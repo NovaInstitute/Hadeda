@@ -25,7 +25,7 @@ hadeda_rest_paginate <- function(config, path, query = list()) {
     responses <- append(responses, list(resp))
 
     links <- resp$links %||% list()
-    next_link <- links$next %||% NULL
+    next_link <- links[["next"]] %||% NULL
     if (is.null(next_link) || identical(next_link, "")) {
       break
     }
