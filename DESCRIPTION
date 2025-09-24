@@ -1,0 +1,40 @@
+Package: hadeda
+Type: Package
+Title: Hedera Hashgraph Tidyverse Client
+Version: 0.0.0.9000
+Authors@R: person(
+    given = "Hadeda",
+    family = "Project",
+    email = "hadeda@example.com",
+    role = c("aut", "cre")
+)
+Description: Hadeda provides tidyverse-oriented wrappers around the Hedera
+    Hashgraph Mirror Node REST API and gRPC services. It standardises
+    argument names, response schemas, and authentication workflows so
+    analysts can interact with Hedera using familiar R conventions.
+License: MIT + file LICENSE
+URL: https://github.com/hadeda-r/hadeda
+BugReports: https://github.com/hadeda-r/hadeda/issues
+Depends:
+    R (>= 4.2)
+Imports:
+    cli,
+    httr2,
+    jsonlite,
+    lifecycle,
+    purrr,
+    rlang,
+    tibble,
+    vctrs
+Suggests:
+    bit64,
+    devtools,
+    httptest2,
+    lintr,
+    lubridate,
+    mockery,
+    testthat (>= 3.1.0)
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
