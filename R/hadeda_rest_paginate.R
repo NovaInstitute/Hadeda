@@ -1,27 +1,20 @@
-hadeda_rest_get <- function(config, path, query = list()) {
-  rest <- hadeda_require_rest(config)
-  base <- rest$base_url
-
-  req <- if (grepl("^https?://", path)) {
-    httr2::request(path)
-  } else {
-    httr2::request(base) |>
-      httr2::req_url_path_append(path)
-  }
-
-  if (length(query) > 0) {
-    req <- rlang::exec(httr2::req_url_query, req, !!!query)
-  }
-
-  headers <- rest$headers %||% list()
-  if (length(headers) > 0) {
-    req <- rlang::exec(httr2::req_headers, req, !!!headers)
-  }
-
-  resp <- httr2::req_perform(req)
-  httr2::resp_body_json(resp, simplifyVector = FALSE)
-}
-
+#' Paginate through Mirror Node REST responses
+#'
+#' Iterate through paginated endpoints, accumulating responses.
+#'
+#' @inheritParams hadeda_rest_get
+#'
+#' @return A list of parsed responses for each page.
+#'
+#' @examples
+#' config <- hadeda_config()
+#' path <- "transactions"
+#' query <- list(limit = 2)
+#' \dontrun{
+#' hadeda_rest_paginate(config, path, query)
+#' }
+#'
+#' @keywords internal
 hadeda_rest_paginate <- function(config, path, query = list()) {
   responses <- list()
   next_path <- path
