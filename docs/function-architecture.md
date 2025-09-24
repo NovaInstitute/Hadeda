@@ -57,6 +57,29 @@ As new utilities arrive (pagination, validators, signing helpers), they
 will receive corresponding unit tests under `tests/testthat/` so that CI
 runs provide quick feedback.
 
+## Phase 2 progress
+
+Phase 2 focused on wiring core Mirror Node endpoints to the transport
+helpers introduced in Phase 1. The following user-facing verbs now ship
+with REST backends and pagination-aware parsers:
+
+- `accounts_list()`, `accounts_get()`, and `accounts_balance()` return
+  tidy account and balance records with parsed timestamps and key
+  metadata.
+- `transactions_list()`, `transactions_get()`, and `topics_messages()`
+  expose transaction history and topic message retrieval with shared
+  timestamp parsing utilities.
+- `tokens_get()`, `tokens_balances()`, `contracts_get()`, and
+  `contracts_bytecode()` wrap token and contract metadata endpoints,
+  normalising nested payloads into list-columns when appropriate.
+
+Each helper honours the configuration list returned by
+`hadeda_config()`, accepts an optional `.transport` override, and routes
+requests through common REST builders. The shared pagination helper
+collects `links$next` cursors to surface multi-page responses as a
+single tibble. Unit tests mock the REST layer so parsers and query
+construction behave deterministically.
+
 ## Next Steps
 1. Expand helper coverage with argument validators (identifier
    normalisers, pagination cursors, signer abstractions).

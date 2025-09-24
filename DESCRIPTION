@@ -20,6 +20,7 @@ Imports:
     cli,
     httr2,
     jsonlite,
+    lubridate,
     lifecycle,
     purrr,
     rlang,
@@ -30,7 +31,6 @@ Suggests:
     devtools,
     httptest2,
     lintr,
-    lubridate,
     mockery,
     testthat (>= 3.1.0)
 Config/testthat/edition: 3
