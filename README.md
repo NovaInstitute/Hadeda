@@ -125,9 +125,9 @@ layered approach so that R users can pick a credential workflow that balances co
   ship helpers (e.g., `hadeda_key_store_set()` / `hadeda_key_store_get()`) that wrap these packages to register a key once and
   retrieve it on demand during signing. Keys are never persisted to disk by Hadeda; the package only requests in-memory
   materialization for the duration of a request.
-* **Ephemeral session keys** – Advanced users can supply `openssl::read_key()` or `sodium` key objects directly to
-  `hadeda_client()` when constructing a session. The client object will hold raw key material in-memory only and wipe it with
-  `openssl::zeroize()` when the session is closed to avoid lingering secrets.
+* **Ephemeral session keys** – Advanced users can supply `openssl::read_key()` or `sodium` key objects directly to the
+  configuration helpers when constructing a request pipeline. The resolved configuration will hold raw key material in-memory
+  only and wipe it with `openssl::zeroize()` after use to avoid lingering secrets.
 * **Environment variables (opt-in)** – For scripts that must run unattended (e.g., CI pipelines), Hadeda will look for
   `HADEDA_PRIVATE_KEY`, `HADEDA_OPERATOR_ID`, and related variables via `Sys.getenv()`. Documentation will clearly warn that
   environment variables are only as secure as the host configuration: storing keys in `.Renviron`, shell history, or shared
@@ -149,12 +149,12 @@ supplied while making it straightforward to add support for hardware wallets or 
 library(hadeda)
 library(dplyr)
 
-accounts <- accounts_list(hadeda_client(network = "testnet")) %>%
+accounts <- accounts_list(hadeda_config(network = "testnet")) %>%
   filter(balance_hbar > 100) %>%
   arrange(desc(balance_hbar))
 
 new_transfer <- crypto_transfer(
-  hadeda_client(network = "testnet"),
+  hadeda_config(network = "testnet"),
   from_account = "0.0.1001",
   to_account = "0.0.2002",
   amount = bit64::as.integer64(1e8)

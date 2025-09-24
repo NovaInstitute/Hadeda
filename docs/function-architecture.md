@@ -1,61 +1,68 @@
-# Phase 1 – Step 2: Clientless Signing & Function Architecture Plan
+# Phase 1 – Step 2: Package Scaffolding & Client Architecture
 
 ## Goals
-- Adopt an idiomatic R interface that accepts signatures (or signers) instead of forcing users to manage a persistent client object.
-- Ensure transport-agnostic function families can delegate signing, transport selection, and asynchronous execution concerns in a predictable way.
-- Identify shared helper functions that can be implemented and tested early to reduce duplication in subsequent work packages.
+- Establish an installable R package skeleton managed with `renv`,
+  `devtools`, and `testthat` so future work can iterate quickly.
+- Introduce a set of pure helper functions that derive REST and gRPC
+  transport settings without relying on mutable client objects.
+- Document helper responsibilities for configuration merging,
+  transport selection, and diagnostics ahead of endpoint-specific
+  implementation.
 
-## Signature Handling Strategy
-- **Primary argument**: each call that needs authentication receives a `signature` argument.
-  - Accepts a character vector (already-prepared signature string) or a function returning a character scalar when called with no arguments.
-  - Helper functions (see below) return closures for secure retrieval, e.g. `signature = signer_env("HEDERA_PRIVATE_KEY")`.
-  - Lazy evaluation lets us defer sensitive key retrieval until just-in-time execution, reducing accidental exposure in logs.
-- **Validation**: a shared `validate_signature(signature)` helper coerces character inputs, confirms length/format, or invokes signer functions with error handling that masks secrets in messages.
-- **Derived arguments**: top-level verbs accept `account_id`, `network`, optional `public_key`. Builders for transactions embed these fields alongside signing metadata, so downstream helpers (e.g. `submit_transaction()`) do not need to know which variant produced the signature.
+## Package Layout
+The package now follows the conventional structure expected by
+`devtools::check()`:
 
-## Function Hierarchy & Responsibilities
-- **Top-level verbs** (e.g. `accounts_create()`, `token_transfer()`): user-facing wrappers.
-  - Collect domain-specific parameters, normalize them into a transaction spec list, call shared builders.
-  - For REST-capable operations, accept `.transport = c("rest", "grpc", "auto")` with default set via package option.
-  - Provide `.async` argument that toggles between synchronous execution (returning parsed response) and asynchronous execution (returning a promise).
-- **Transaction builders** (`build_transaction_*`): create protobuf payloads or REST request bodies.
-  - Receive validated primitives (IDs, amounts, memo) and the **signature provider**; produce a structured object with fields `payload`, `signer`, `transport_requirements`.
-  - Do not perform network I/O.
-- **Submission helpers** (`submit_transaction()`): handle transport selection, signing, retries.
-  - Invoke `resolve_signer()` to materialize the signature just before transport-specific encoding.
-  - For gRPC, attach signatures to protobuf objects; for REST, include in headers/body as required.
-  - For `.async = TRUE`, wrap network request in `future::future()` or `promises::future_promise()` depending on chosen async backend.
-- **Polling/Receipt helpers** (`await_receipt()`, `stream_topic()`): abstract async completion flows.
-  - Accept objects returned by submission helpers and poll endpoints or consume streams until confirmation.
+- `DESCRIPTION`, `NAMESPACE`, and `LICENSE` establish the package
+  identity and declare dependencies used across transports.
+- `R/` contains source files. The initial module introduces
+  configuration helpers that compute transport settings.
+- `tests/testthat/` holds unit tests configured for `testthat`
+  edition 3. Early tests exercise the configuration helpers and
+  merging utilities to ensure consistent behaviour.
+- `.github/workflows/R-CMD-check.yaml` provisions continuous
+  integration using the r-lib actions so every commit executes
+  `R CMD check` on Ubuntu devel, release, and oldrel builds.
+- `renv.lock` plus `renv/activate.R` pin dependency versions and make
+  it easy for contributors to reproduce the development environment.
 
-## Asynchronous Considerations
-- Use a pluggable backend via a package option (e.g. `options(hedera.future_plan = future::multisession)`), defaulting to synchronous execution when `.async = FALSE`.
-- Shared helper `maybe_async(expr, async = FALSE, scheduler = NULL)` returns either the evaluated result or a promise/future.
-- Streaming helpers (e.g. topic message subscription) expose generator-style iterators that yield tibbles; asynchronous consumption relies on helper wrappers from `promises` and `later`.
+## Functional configuration helpers
+Rather than exposing an OO-style client, the package provides a
+collection of pure helpers:
 
-## Cross-Cutting Helpers (Build First)
-1. `is_signer(x)` / `validate_signature(x)` – accept character or function, provide informative errors without revealing secrets.
-2. `signer_env(var, decrypt = identity)` – returns function reading from `Sys.getenv(var)` and optionally piping through a decryptor (e.g. `askpass::askpass`).
-3. `signer_keyring(service, key = NULL)` – closure that fetches keys from `keyring::key_get()` on demand.
-4. `resolve_signer(signature)` – calls `validate_signature()` and forces function inputs.
-5. `maybe_async(expr, async = FALSE, scheduler = getOption("hedera.async_scheduler", NULL))` – standardize async toggling.
-6. `match_transport(.transport, default = getOption("hedera.transport", "auto"))` – centralize transport selection logic.
-7. `normalize_account_id(x)` / `normalize_token_id(x)` – reused across builders and verbs.
-8. `build_request()` scaffolding that transforms builder output into REST/gRPC objects while deferring execution.
+- `hadeda_config()` – returns a named list describing the resolved
+  network, REST, and gRPC settings plus a default transport selection.
+- `hadeda_merge_config()` – shallow-merges user overrides into the
+  network defaults.
+- `hadeda_resolve_transport()` – resolves and validates the transport
+  preference, raising a typed error for unsupported values.
+- `hadeda_network_defaults()` – central lookup for base URLs and gRPC
+  endpoints across Hedera networks.
 
-Implementing and testing helpers (1–7) upfront enables consistent argument validation and behavior across domains before domain-specific verbs are introduced.
+Because the helpers are ordinary functions that take inputs and return
+lists, callers can comfortably use them within tidyverse pipelines or
+pass the resulting configuration into specific verbs as needed.
 
-## Testing Approach for Helpers
-- Unit tests in `tests/testthat/test-signers.R` verifying:
-  - Direct character signatures pass through untouched.
-  - Signer functions are only evaluated once and errors are masked.
-  - `signer_env()` respects `NA` / missing environment variables with informative errors.
-  - Keyring helpers skip gracefully when `keyring` is not installed (skip on missing namespace).
-- Async helper tests in `tests/testthat/test-async.R` covering synchronous vs asynchronous returns using the `promises` test helpers.
-- Transport matcher tests ensuring `.transport` argument accepts partial matches and respects package options.
+## Testing Strategy
+The initial test suite focuses on guarding the scaffolding:
+
+1. Configurations built for supported networks expose the expected
+   structure and default transport.
+2. Default transport inference behaves deterministically when only one
+   transport is configured.
+3. Configuration overrides replace defaults without mutating unrelated
+   fields.
+
+As new utilities arrive (pagination, validators, signing helpers), they
+will receive corresponding unit tests under `tests/testthat/` so that CI
+runs provide quick feedback.
 
 ## Next Steps
-1. Implement signer helpers (`validate_signature()`, `resolve_signer()`, `signer_env()`, `signer_keyring()`).
-2. Implement transport matching helper and ID normalizers.
-3. Introduce `maybe_async()` with placeholder synchronous backend.
-4. Draft skeletons for transaction builders and submission helper to confirm interfaces before implementing domain verbs.
+1. Expand helper coverage with argument validators (identifier
+   normalisers, pagination cursors, signer abstractions).
+2. Implement HTTP and gRPC request builders that honour the
+   configuration helpers while producing tidy tibbles.
+3. Introduce documentation via Roxygen2 for the configuration helpers and
+   publish rendered Rd files in `man/`.
+4. Begin implementing Phase 1, Step 3 utilities (HTTP/gRPC helper
+   layer) using the scaffolding delivered here.

@@ -8,11 +8,11 @@
 2. **Package scaffolding**
    * Initialize R package structure with `usethis::create_package()`.
    * Configure `renv`, `devtools`, `testthat`, and CI workflows.
-   * Define the `.client` S3 class, including REST and gRPC configuration slots and a `default_transport` field.
+   * Provide pure configuration helpers that derive REST and gRPC settings plus a default transport field.
 3. **Utility layer**
    * Implement HTTP client helpers using `httr2` for REST and `grpc`/`RProtoBuf` for RPC calls.
    * Create shared validators, pagination helpers, and response normalizers that output tibbles.
-   * Add a transport router that inspects `.transport` overrides and `.client$default_transport` to choose REST vs gRPC while preserving shared argument names.
+   * Add a transport router that inspects `.transport` overrides and configuration defaults to choose REST vs gRPC while preserving shared argument names.
 
 ## Phase 2 – Core endpoints
 
