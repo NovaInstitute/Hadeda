@@ -90,6 +90,34 @@ To keep the API consistent, internal helpers will:
 * Provide request builders that serialize inputs into protobuf messages using `RProtoBuf`.
 * Harmonize REST JSON payloads and gRPC protobuf responses into shared tidy schemas via `vctrs::vec_rbind()` builders.
 
+## Signing and key management plan
+
+Interacting with Hedera's gRPC services requires clients to sign transactions with their private keys. Hadeda will provide a
+layered approach so that R users can pick a credential workflow that balances convenience and security:
+
+* **Dedicated key stores** – Prefer storing private keys in secure OS-backed vaults managed by packages such as
+  [`keyring`](https://cran.r-project.org/package=keyring) or [`askpass`](https://cran.r-project.org/package=askpass). Hadeda will
+  ship helpers (e.g., `hadeda_key_store_set()` / `hadeda_key_store_get()`) that wrap these packages to register a key once and
+  retrieve it on demand during signing. Keys are never persisted to disk by Hadeda; the package only requests in-memory
+  materialization for the duration of a request.
+* **Ephemeral session keys** – Advanced users can supply `openssl::read_key()` or `sodium` key objects directly to
+  `hadeda_client()` when constructing a session. The client object will hold raw key material in-memory only and wipe it with
+  `openssl::zeroize()` when the session is closed to avoid lingering secrets.
+* **Environment variables (opt-in)** – For scripts that must run unattended (e.g., CI pipelines), Hadeda will look for
+  `HADEDA_PRIVATE_KEY`, `HADEDA_OPERATOR_ID`, and related variables via `Sys.getenv()`. Documentation will clearly warn that
+  environment variables are only as secure as the host configuration: storing keys in `.Renviron`, shell history, or shared
+  servers is discouraged. Guidance will recommend using environment variables exclusively in locked-down automation contexts
+  (GitHub Actions secrets, HashiCorp Vault injections) and pairing them with `renv::load_dot_env()` or `withr::with_envvar()` to
+  minimize exposure.
+* **Safety prompts** – Whenever a user attempts to register a key through a plain-text mechanism (e.g., pasting into the R
+  console), Hadeda will issue a `cli::cli_alert_warning()` explaining the risks and pointing to the secure storage helpers. The
+  package vignette will include a "Choosing a signing strategy" section that compares the security posture of each option.
+
+Internally, signing will be mediated by a `hadeda_sign_transaction()` helper that accepts a generic key provider interface. The
+provider will resolve to one of the strategies above, normalize the key into the protobuf-required format, and return an
+`openssl::signature` object ready for gRPC submission. This abstraction keeps endpoint wrappers agnostic to how credentials are
+supplied while making it straightforward to add support for hardware wallets or external agents in the future.
+
 ## Example workflow
 
 ```r
