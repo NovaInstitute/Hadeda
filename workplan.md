@@ -16,15 +16,15 @@
 
 ## Phase 2 – Core endpoints
 
-4. **Accounts domain**
+4. ✅ **Accounts domain**
    * Implement `accounts_list()`, `accounts_get()`, and `accounts_balance()` with full parameter coverage.
    * Provide both REST and (when available) gRPC backends behind the same function signatures, ensuring output tibbles align.
    * Add fixtures and mocked tests for pagination and filtering logic.
-5. **Transactions & topics**
+5. ✅ **Transactions & topics**
    * Implement transaction query helpers and topic message readers.
    * Ensure timestamp parsing with `lubridate` and type-stable returns.
    * Confirm that REST and gRPC responses coerce into identical schemas for downstream piping.
-6. **Tokens & contracts**
+6. ✅ **Tokens & contracts**
    * Cover token metadata, treasury relationships, contract info, and bytecode retrieval.
    * Validate list-column structures for nested token associations.
    * Share protobuf builders and REST serializers so verbs like `contracts_get()` can switch transports with a `.transport` argument.
