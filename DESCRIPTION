@@ -2,8 +2,11 @@ Package: hadeda
 Type: Package
 Title: Hedera Hashgraph Tidyverse Client
 Version: 0.0.0.9000
-Authors@R: c(
-    person("Hadeda", "Project", email = "hadeda@example.com", role = c("aut", "cre"))
+Authors@R: person(
+    given = "Hadeda",
+    family = "Project",
+    email = "hadeda@example.com",
+    role = c("aut", "cre")
 )
 Description: Hadeda provides tidyverse-oriented wrappers around the Hedera
     Hashgraph Mirror Node REST API and gRPC services. It standardises
