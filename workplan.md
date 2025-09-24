@@ -2,7 +2,7 @@
 
 ## Phase 1 – Foundations
 
-1. **Landscape analysis**
+1. ✅ **Landscape analysis**
    * Review Hedera SDKs (Go, Java, JavaScript) and protobuf definitions to catalog available operations.
    * Confirm REST endpoint behavior via Mirror Node API documentation and sample responses.
 2. **Package scaffolding**
