@@ -16,12 +16,17 @@
 #'
 #' @keywords internal
 hadeda_rest_paginate <- function(config, path, query = list()) {
+  rest <- hadeda_require_rest(config)
+  base_segments <- httr2::url_parse(rest$base_url)$path %||% character()
+
   responses <- list()
   next_path <- path
   next_query <- query
 
   while (!is.null(next_path)) {
-    resp <- hadeda_rest_get(config, next_path, next_query)
+    current_path <- next_path
+    current_query <- next_query
+    resp <- hadeda_rest_get(config, current_path, current_query)
     responses <- append(responses, list(resp))
 
     links <- resp$links %||% list()
@@ -34,9 +39,22 @@ hadeda_rest_paginate <- function(config, path, query = list()) {
       next_path <- next_link
       next_query <- list()
     } else {
-      pieces <- httr2::url_parse(next_link)
-      next_path <- paste(pieces$path, collapse = "/")
-      next_query <- hadeda_drop_null(pieces$query)
+      relative <- sub("^/+", "", next_link)
+      pieces <- httr2::url_parse(paste0("https://placeholder.invalid/", relative))
+
+      path_segments <- pieces$path %||% character()
+      if (length(base_segments) > 0 &&
+          length(path_segments) >= length(base_segments) &&
+          identical(path_segments[seq_along(base_segments)], base_segments)) {
+        path_segments <- path_segments[-seq_along(base_segments)]
+      }
+
+      next_path <- paste(path_segments, collapse = "/")
+      if (identical(next_path, "")) {
+        next_path <- current_path
+      }
+
+      next_query <- hadeda_drop_null(pieces$query %||% list())
     }
   }
 
