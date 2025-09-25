@@ -60,6 +60,12 @@ Additional streaming helpers such as `topics_messages_stream()` and
 `consensus_topic_subscribe()` will wrap the Mirror Node streaming APIs so that R
 workflows remain on par with JavaScript SDK capabilities.
 
+The initial CryptoService implementation now ships with working
+`crypto_create_account()`, `crypto_transfer()`, and
+`crypto_update_account_keys()` helpers. These functions accept tidy inputs,
+delegate to user-provided gRPC handlers, and return acknowledgement tibbles that
+mirror the rest of the package.
+
 ## Naming and argument conventions
 
 * **Function names**

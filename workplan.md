@@ -31,9 +31,9 @@
 
 ## Phase 3 – RPC interactions
 
-7. **Consensus service**
+7. ✅ **Consensus service**
    * Implement `consensus_submit_message()` with message chunking and acknowledgement handling.
-8. **Crypto service**
+8. ✅ **Crypto service**
    * Implement account creation, key management, and transfer helpers, leveraging protobuf builders and REST fallbacks where mirror endpoints exist.
 9. **Token service**
    * Implement token creation, association, and transfer RPC helpers with explicit fee controls and REST fallbacks when possible.
