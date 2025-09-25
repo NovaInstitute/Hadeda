@@ -29,8 +29,8 @@ test_that("hadeda_parse_topics parses fields", {
     running_hash = "abcd",
     running_hash_version = 2,
     deleted = FALSE,
-    admin_key = list(_type = "ED25519", key = "abc"),
-    submit_key = list(_type = "ED25519", key = "def"),
+    admin_key = list("_type" = "ED25519", key = "abc"),
+    submit_key = list("_type" = "ED25519", key = "def"),
     ledger_id = "0x02"
   )
 
@@ -92,7 +92,7 @@ test_that("topics_create submits payload", {
     tbl <- topics_create(
       cfg,
       memo = "created",
-      admin_key = list(_type = "ED25519", key = "abc"),
+      admin_key = list("_type" = "ED25519", key = "abc"),
       auto_renew_account = "0.0.3",
       auto_renew_period = 7890000
     )
