@@ -13,3 +13,5 @@
 - Implemented FileService helpers (`file_create()`, `file_update()`,
   `file_append()`, `file_delete()`, `file_content()`, `file_info()`) with unit
   tests and documentation updates marking full RPC coverage.
+- Added `balances_list()` to expose timestamped mirror node balance snapshots
+  with pagination-aware parsing and comprehensive filter support.
