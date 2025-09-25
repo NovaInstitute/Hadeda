@@ -49,7 +49,9 @@
 12. **Documentation**
     * Use Roxygen2 to document each function with links to Hedera specifications.
     * Document the `.transport` argument and dual-backend behavior in man pages and vignettes.
-    * Build vignettes demonstrating tidyverse pipelines for analytics and operations across both transports.
+    * Build vignettes demonstrating tidyverse pipelines for analytics and operations across both transports. 
+    Organise the vignettes into typical user journeys starting with a basic account creation and environment and key setup. 
+    Follow up with separate vignettes for the Topics, Transactions, Tokens, and Contracts
 13. **Release preparation**
     * Finalize README, NEWS, and pkgdown site.
     * Submit to CRAN or publish binaries as appropriate.
