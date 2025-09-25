@@ -23,7 +23,7 @@ Hadeda will expose verbs for every Mirror Node endpoint that the reference SDKs
 wrap today, grouped by functional area:
 
 * **Accounts and balances** – `accounts_list()`, `accounts_get()`,
-  `accounts_balance()`, allowance readers, rewards history, and `balances_list()`
+  `accounts_balance()`, `accounts_allowances_crypto()`, upcoming token/NFT allowance readers, rewards history, and `balances_list()`
   for timestamped snapshots.
 * **Blocks and contracts** – block pagination plus full contract metadata,
   state, result listings, and per-transaction execution lookups.

@@ -20,6 +20,7 @@
    * Implement `accounts_list()`, `accounts_get()`, and `accounts_balance()` with full parameter coverage.
    * Provide both REST and (when available) gRPC backends behind the same function signatures, ensuring output tibbles align.
    * Add fixtures and mocked tests for pagination and filtering logic.
+   * Expand allowance coverage starting with `accounts_allowances_crypto()`; follow-up functions will bring token and NFT approvals online.
 5. ✅ **Transactions & topics**
    * Implement transaction query helpers and topic message readers.
    * Ensure timestamp parsing with `lubridate` and type-stable returns.

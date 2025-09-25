@@ -84,6 +84,51 @@ test_that("accounts_balance unwraps balances payload", {
   expect_s3_class(tbl$timestamp, "POSIXct")
 })
 
+test_that("accounts_allowances_crypto paginates and parses allowances", {
+  cfg <- hadeda_config(network = "testnet")
+  page <- list(
+    allowances = list(
+      list(
+        owner = "0.0.1234",
+        spender = "0.0.5678",
+        amount = 1000,
+        timestamp = "1672531400.000000000",
+        delegating_spender = "0.0.7777",
+        payer_account_id = "0.0.6006",
+        transaction_id = "0.0.6006-123456789-000000000"
+      )
+    ),
+    links = list(`next` = NULL)
+  )
+
+  with_mocked_bindings({
+    tbl <- accounts_allowances_crypto(
+      cfg,
+      account_id = "0.0.1234",
+      limit = 25,
+      spender_id = "0.0.5678",
+      order = "asc",
+      timestamp = "gt:1672531300.000000000Z"
+    )
+  }, hadeda_rest_paginate = function(config, path, query) {
+    expect_identical(path, "accounts/0.0.1234/allowances/crypto")
+    expect_equal(query$limit, 25)
+    expect_equal(query$order, "asc")
+    expect_equal(query$`spender.id`, "0.0.5678")
+    expect_equal(query$timestamp, "gt:1672531300.000000000Z")
+    list(page)
+  })
+
+  expect_equal(nrow(tbl), 1)
+  expect_equal(tbl$owner, "0.0.1234")
+  expect_equal(tbl$spender, "0.0.5678")
+  expect_equal(tbl$amount, 1000)
+  expect_equal(tbl$delegating_spender, "0.0.7777")
+  expect_equal(tbl$payer_account_id, "0.0.6006")
+  expect_equal(tbl$transaction_id, "0.0.6006-123456789-000000000")
+  expect_s3_class(tbl$timestamp, "POSIXct")
+})
+
 test_that("accounts_create posts payload and parses response", {
   cfg <- hadeda_config(network = "testnet")
   response <- list(
