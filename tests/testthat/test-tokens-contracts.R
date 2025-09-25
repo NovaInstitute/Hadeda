@@ -73,6 +73,137 @@ test_that("tokens_create posts payload and returns identifiers", {
   expect_equal(tbl$token_id, "0.0.7001")
   expect_equal(tbl$status, "SUCCESS")
   expect_equal(tbl$transaction_id, "0.0.6001-1700000000-000000000")
+  expect_true(is.na(tbl$receipt_status))
+  expect_true(is.na(tbl$consensus_timestamp))
+  expect_equal(tbl$receipt, list(list()))
+  expect_equal(tbl$response, list(response))
+})
+
+test_that("tokens_create delegates to gRPC when requested", {
+  cfg <- hadeda_config(network = "testnet")
+  response <- list(
+    transactionId = "0.0.6001-1700000000-000000001",
+    status = "OK",
+    receipt = list(tokenId = "0.0.7002", status = "SUCCESS"),
+    tokenId = "0.0.7002"
+  )
+
+  with_mocked_bindings({
+    tbl <- tokens_create(
+      cfg,
+      name = "gRPC Token",
+      symbol = "GRPC",
+      treasury_account_id = "0.0.1234",
+      initial_supply = 25,
+      decimals = 2,
+      max_fee = 1e6,
+      wait_for_receipt = FALSE,
+      .transport = "grpc"
+    )
+  }, hadeda_grpc_tokens_create = function(config,
+                                           name,
+                                           symbol,
+                                           treasury_account_id,
+                                           initial_supply,
+                                           decimals,
+                                           token_type,
+                                           memo,
+                                           freeze_default,
+                                           max_fee,
+                                           wait_for_receipt) {
+    expect_equal(name, "gRPC Token")
+    expect_equal(symbol, "GRPC")
+    expect_equal(treasury_account_id, "0.0.1234")
+    expect_equal(initial_supply, 25)
+    expect_equal(decimals, 2)
+    expect_equal(token_type, "FUNGIBLE_COMMON")
+    expect_equal(max_fee, 1e6)
+    expect_false(wait_for_receipt)
+    response
+  })
+
+  expect_equal(tbl$token_id, "0.0.7002")
+  expect_equal(tbl$status, "OK")
+  expect_equal(tbl$receipt_status, "SUCCESS")
+  expect_equal(tbl$transaction_id, "0.0.6001-1700000000-000000001")
+  expect_equal(tbl$response, list(response))
+})
+
+test_that("tokens_associate normalises identifiers and parses responses", {
+  cfg <- hadeda_config(network = "testnet")
+  response <- list(
+    transactionId = "0.0.1111-1700000000-000000002",
+    status = "OK",
+    receipt = list(status = "SUCCESS")
+  )
+
+  with_mocked_bindings({
+    tbl <- tokens_associate(
+      cfg,
+      account_id = "0.0.2002",
+      token_ids = data.frame(token_id = c("0.0.7001", "0.0.7002")),
+      memo = "associate",
+      max_fee = 123,
+      .transport = "grpc"
+    )
+  }, hadeda_grpc_tokens_associate = function(config,
+                                              account_id,
+                                              token_ids,
+                                              memo,
+                                              max_fee,
+                                              wait_for_receipt) {
+    expect_equal(account_id, "0.0.2002")
+    expect_equal(token_ids, c("0.0.7001", "0.0.7002"))
+    expect_equal(memo, "associate")
+    expect_equal(max_fee, 123)
+    expect_true(wait_for_receipt)
+    response
+  })
+
+  expect_equal(tbl$account_id, "0.0.2002")
+  expect_equal(tbl$token_ids[[1]], c("0.0.7001", "0.0.7002"))
+  expect_equal(tbl$receipt_status, "SUCCESS")
+  expect_equal(tbl$response, list(response))
+})
+
+test_that("tokens_transfer accepts tidy transfer specs", {
+  cfg <- hadeda_config(network = "testnet")
+  transfer_df <- data.frame(
+    token_id = c("0.0.7001", "0.0.7001"),
+    account_id = c("0.0.2002", "0.0.2003"),
+    amount = c(-50, 50)
+  )
+  response <- list(
+    transactionId = "0.0.1111-1700000000-000000003",
+    status = "OK",
+    receipt = list(status = "SUCCESS")
+  )
+
+  with_mocked_bindings({
+    tbl <- tokens_transfer(
+      cfg,
+      token_transfers = transfer_df,
+      memo = "rebalance",
+      max_fee = 456,
+      wait_for_receipt = FALSE,
+      .transport = "grpc"
+    )
+  }, hadeda_grpc_tokens_transfer = function(config,
+                                             token_transfers,
+                                             memo,
+                                             max_fee,
+                                             wait_for_receipt) {
+    expect_equal(length(token_transfers), 2)
+    expect_equal(token_transfers[[1]]$token_id, "0.0.7001")
+    expect_equal(token_transfers[[1]]$amount, -50)
+    expect_equal(memo, "rebalance")
+    expect_equal(max_fee, 456)
+    expect_false(wait_for_receipt)
+    response
+  })
+
+  expect_equal(tbl$receipt_status, "SUCCESS")
+  expect_equal(tbl$token_transfers[[1]][[1]]$account_id, "0.0.2002")
   expect_equal(tbl$response, list(response))
 })
 

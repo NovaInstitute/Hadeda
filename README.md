@@ -175,6 +175,21 @@ new_token <- tokens_create(
   symbol = "HADEDA",
   treasury_account_id = from_account$account
 )
+tokens_associate(
+  hadeda_config(network = "testnet"),
+  account_id = to_account$account,
+  token_ids = new_token$token_id,
+  .transport = "grpc"
+)
+tokens_transfer(
+  hadeda_config(network = "testnet"),
+  token_transfers = tibble::tibble(
+    token_id = new_token$token_id,
+    account_id = c(from_account$account, to_account$account),
+    amount = c(-10, 10)
+  ),
+  .transport = "grpc"
+)
 new_transfer <- crypto_transfer(
   hadeda_config(network = "testnet"),
   from_account = from_account$account,
@@ -189,6 +204,23 @@ new_transfer <- crypto_transfer(
 * `man/` – Roxygen2-generated documentation referencing Hedera specs.
 * `tests/` – Testthat suites mocking REST and gRPC requests.
 * `inst/vignettes/` – Usage guides and walkthroughs for common workflows.
+
+## Token service RPC helpers
+
+Hadeda now surfaces TokenService mutations alongside the existing REST
+wrappers:
+
+* `tokens_create()` supports `.transport = "grpc"` with `max_fee` and
+  `wait_for_receipt` controls when paired with a gRPC handler such as
+  `config$grpc$token_create`.
+* `tokens_associate()` maps to the `associateTokens` RPC, normalising token
+  identifiers before submitting the request.
+* `tokens_transfer()` issues multi-party transfers with tidy data frame or list
+  inputs and explicit fee controls.
+
+When using the gRPC transport, configure handlers via
+`hadeda_config(grpc = list(token_create = function(...) {...}))` or integrate an
+SDK-backed client within the `config$grpc` list.
 
 ## Contributing
 
