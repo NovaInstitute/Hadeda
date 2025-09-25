@@ -111,11 +111,18 @@ hadeda_normalise_token_transfers <- function(token_transfers) {
     }
     return(lapply(seq_len(nrow(token_transfers)), function(idx) {
       row <- token_transfers[idx, , drop = FALSE]
+      serial_numbers <- NULL
+      if ("serial_numbers" %in% names(row)) {
+        serial_numbers <- row$serial_numbers[[1]]
+      } else if ("serialNumbers" %in% names(row)) {
+        serial_numbers <- row$serialNumbers[[1]]
+      }
+
       list(
         token_id = as.character(row$token_id[[1]]),
         account_id = as.character(row$account_id[[1]]),
         amount = row$amount[[1]],
-        serial_numbers = row$serial_numbers[[1]] %||% row$serialNumbers[[1]] %||% NULL
+        serial_numbers = serial_numbers
       )
     }))
   }
