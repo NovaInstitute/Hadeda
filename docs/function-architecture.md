@@ -73,6 +73,9 @@ with REST backends and pagination-aware parsers:
 - `tokens_get()`, `tokens_balances()`, `contracts_get()`, and
   `contracts_bytecode()` wrap token and contract metadata endpoints,
   normalising nested payloads into list-columns when appropriate.
+- `network_nodes()`, `network_stake()`, and the new `network_exchange_rate()`
+  helper expose governance metadata and HBAR to USD cent exchange rates so
+  downstream analyses can react to network-level economics.
 
 Each helper honours the configuration list returned by
 `hadeda_config()`, accepts an optional `.transport` override, and routes

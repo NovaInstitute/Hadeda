@@ -28,8 +28,9 @@ wrap today, grouped by functional area:
   for timestamped snapshots.
 * **Blocks and contracts** – block pagination plus full contract metadata,
   state, result listings, and per-transaction execution lookups.
-* **Network and governance** – exchange rates, fee schedules, node address
-  book, and supply metrics to match the Java SDK helper utilities.
+* **Network and governance** – exchange rates via `network_exchange_rate()`,
+  fee schedules, node address book, and supply metrics to match the Java SDK
+  helper utilities.
 * **Tokens and NFTs** – token metadata, balances, NFT inventory and
   transactions, and token-level allowance views.
 * **Topics and transactions** – transaction queries and state proofs alongside
