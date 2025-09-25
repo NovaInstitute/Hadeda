@@ -11,7 +11,7 @@ Hadeda function we will implement.
 
 ## Coverage snapshot
 
-- **Mirror Node REST:** 17 of 38 documented endpoints now have corresponding Hadeda helpers (≈45% coverage), spanning accounts, blocks, contracts, network metadata, tokens, topics, and transactions.
+- **Mirror Node REST:** 19 of 38 documented endpoints now have corresponding Hadeda helpers (≈50% coverage), spanning accounts, blocks, contracts, network metadata, tokens, topics, and transactions.
 - **gRPC services:** Consensus topic submission plus the initial CryptoService (account create, transfer, key update),
 TokenService (create, associate, transfer), and SmartContractService (deploy, call) helpers are live; the remaining RPCs below
 remain planned stubs.
@@ -30,8 +30,8 @@ widely available transport today.
 | Accounts | `/api/v1/accounts/{accountId}` | Retrieve a single account, including key, memo, staking info | `accounts_get()` | ✅ Implemented |
 | Accounts | `/api/v1/accounts/{accountId}/balance` | Fetch the latest balance snapshot for an account | `accounts_balance()` | ✅ Implemented |
 | Accounts | `/api/v1/accounts/{accountId}/allowances/crypto` | View approved HBAR allowances | `accounts_allowances_crypto()` | ✅ Implemented |
-| Accounts | `/api/v1/accounts/{accountId}/allowances/tokens` | View approved fungible token allowances | `accounts_allowances_tokens()` | 🚧 Planned |
-| Accounts | `/api/v1/accounts/{accountId}/allowances/nfts` | View approved NFT allowances | `accounts_allowances_nfts()` | 🚧 Planned |
+| Accounts | `/api/v1/accounts/{accountId}/allowances/tokens` | View approved fungible token allowances | `accounts_allowances_tokens()` | ✅ Implemented |
+| Accounts | `/api/v1/accounts/{accountId}/allowances/nfts` | View approved NFT allowances | `accounts_allowances_nfts()` | ✅ Implemented |
 | Accounts | `/api/v1/accounts/{accountId}/rewards` | Retrieve staking reward history | `accounts_rewards()` | 🚧 Planned |
 | Accounts | `/api/v1/balances` | List account balances at a consensus timestamp | `balances_list()` | 🚧 Planned |
 | Blocks | `/api/v1/blocks` | Enumerate blocks with hash, number, and timestamp | `blocks_list()` | ✅ Implemented |
