@@ -16,8 +16,18 @@
 #'
 #' @keywords internal
 hadeda_rest_paginate <- function(config, path, query = list()) {
+  split_path_segments <- function(path) {
+    if (is.null(path) || length(path) == 0) {
+      return(character())
+    }
+
+    path <- path[[1]]
+    segments <- strsplit(path, "/", fixed = TRUE)[[1]]
+    segments[segments != ""]
+  }
+
   rest <- hadeda_require_rest(config)
-  base_segments <- httr2::url_parse(rest$base_url)$path %||% character()
+  base_segments <- split_path_segments(httr2::url_parse(rest$base_url)$path)
 
   responses <- list()
   next_path <- path
@@ -42,7 +52,7 @@ hadeda_rest_paginate <- function(config, path, query = list()) {
       relative <- sub("^/+", "", next_link)
       pieces <- httr2::url_parse(paste0("https://placeholder.invalid/", relative))
 
-      path_segments <- pieces$path %||% character()
+      path_segments <- split_path_segments(pieces$path)
       if (length(base_segments) > 0 &&
           length(path_segments) >= length(base_segments) &&
           identical(path_segments[seq_along(base_segments)], base_segments)) {
