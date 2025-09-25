@@ -10,3 +10,6 @@
   tokens, and contracts to guide typical user journeys across transports.
 - Configured lintr, pkgdown navigation, and release collateral to support
   consistent style enforcement and site generation ahead of publication.
+- Implemented FileService helpers (`file_create()`, `file_update()`,
+  `file_append()`, `file_delete()`, `file_content()`, `file_info()`) with unit
+  tests and documentation updates marking full RPC coverage.
