@@ -33,7 +33,7 @@ test_that("tokens_balances returns flattened balances", {
     expect_equal(query$limit, 2)
     expect_equal(query$`account.id`, "0.0.1001")
     expect_equal(query$order, "asc")
-    list(list(balances = balances, links = list(next = NULL)))
+    list(list(balances = balances, links = list("next" = NULL)))
   })
 
   expect_equal(nrow(tbl), 2)

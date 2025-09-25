@@ -2,8 +2,8 @@ test_that("hadeda_rest_paginate follows relative next links", {
   cfg <- hadeda_config(network = "testnet")
 
   responses <- list(
-    list(links = list(next = "accounts?cursor=abc")),
-    list(links = list(next = NULL))
+    list(links = list("next" = "accounts?cursor=abc")),
+    list(links = list("next" = NULL))
   )
 
   calls <- list()
@@ -28,8 +28,8 @@ test_that("hadeda_rest_paginate trims base path prefixes", {
   cfg <- hadeda_config(network = "testnet")
 
   responses <- list(
-    list(links = list(next = "/api/v1/accounts?cursor=def")),
-    list(links = list(next = NULL))
+    list(links = list("next" = "/api/v1/accounts?cursor=def")),
+    list(links = list("next" = NULL))
   )
 
   calls <- list()
@@ -52,8 +52,8 @@ test_that("hadeda_rest_paginate preserves path when next link is query only", {
   cfg <- hadeda_config(network = "testnet")
 
   responses <- list(
-    list(links = list(next = "?cursor=ghi")),
-    list(links = list(next = NULL))
+    list(links = list("next" = "?cursor=ghi")),
+    list(links = list("next" = NULL))
   )
 
   calls <- list()

@@ -9,7 +9,7 @@ test_that("accounts_list paginates and parses records", {
         key = list(key = "302a300506032b6570032100abc")
       )
     ),
-    links = list(next = "accounts?cursor=next")
+    links = list("next" = "accounts?cursor=next")
   )
   page_two <- list(
     accounts = list(
@@ -20,7 +20,7 @@ test_that("accounts_list paginates and parses records", {
         key = list(key = "302a300506032b6570032100def")
       )
     ),
-    links = list(next = NULL)
+    links = list("next" = NULL)
   )
 
   with_mocked_bindings({
