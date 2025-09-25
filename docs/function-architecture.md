@@ -63,9 +63,10 @@ Phase 2 focused on wiring core Mirror Node endpoints to the transport
 helpers introduced in Phase 1. The following user-facing verbs now ship
 with REST backends and pagination-aware parsers:
 
-- `accounts_list()`, `accounts_get()`, and `accounts_balance()` return
-  tidy account and balance records with parsed timestamps and key
-  metadata.
+- `accounts_list()`, `accounts_get()`, `accounts_balance()`,
+  `accounts_allowances_crypto()`, `accounts_allowances_tokens()`, and
+  `accounts_allowances_nfts()` return tidy account and balance records
+  with parsed timestamps and key metadata plus allowance detail.
 - `transactions_list()`, `transactions_get()`, and `topics_messages()`
   expose transaction history and topic message retrieval with shared
   timestamp parsing utilities.
