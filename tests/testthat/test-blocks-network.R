@@ -129,6 +129,36 @@ test_that("network_stake parses stake snapshots", {
   expect_equal(tbl$total_stake, 100000)
 })
 
+test_that("network_exchange_rate parses current and next rates", {
+  cfg <- hadeda_config(network = "testnet")
+  response <- list(
+    timestamp = "1700000300.000000000",
+    current_rate = list(
+      hbar_equivalent = 1,
+      cent_equivalent = 12,
+      expiration_time = 1700000360
+    ),
+    next_rate = list(
+      hbar_equivalent = 2,
+      cent_equivalent = 25,
+      expirationTime = 1700000420
+    )
+  )
+
+  with_mocked_bindings({
+    tbl <- network_exchange_rate(cfg)
+  }, hadeda_rest_get = function(config, path, query = list()) {
+    expect_identical(path, "network/exchangerate")
+    response
+  })
+
+  expect_equal(nrow(tbl), 2)
+  expect_equal(sort(tbl$rate_type), c("current", "next"))
+  expect_equal(tbl$cent_equivalent, c(12, 25))
+  expect_s3_class(tbl$effective_timestamp, "POSIXct")
+  expect_s3_class(tbl$expiration_timestamp, "POSIXct")
+})
+
 test_that("tokens_nfts parses NFT list", {
   cfg <- hadeda_config(network = "testnet")
   token_id <- "0.0.5000"
