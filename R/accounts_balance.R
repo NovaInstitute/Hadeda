@@ -9,13 +9,23 @@
 #' @return A tibble with balance and token holdings.
 #'
 #' @examples
-#' config <- hadeda_config()
-#' balance <- accounts_balance(
-#'   config = config,
-#'   account_id = "0.0.1001",
-#'   timestamp = "1700000000.000000000"
+#' mirror <- hadeda_config(network = "testnet")
+#' hashio <- hadeda_config(
+#'   network = "testnet",
+#'   rest = list(
+#'     base_url = "https://testnet.hashio.io/api/v1",
+#'     headers = list(`X-API-Key` = Sys.getenv("HASHIO_API_KEY"))
+#'   ),
+#'   default_transport = "rest"
 #' )
-#' balance
+#' \dontrun{
+#'   new_account <- accounts_create(hashio)
+#'   accounts_balance(
+#'     config = mirror,
+#'     account_id = new_account$account,
+#'     timestamp = "1700000000.000000000"
+#'   )
+#' }
 #'
 #' @export
 accounts_balance <- function(config, account_id, timestamp = NULL, .transport = NULL) {

@@ -72,7 +72,7 @@ workflows remain on par with JavaScript SDK capabilities.
   * A `.transport` argument defaults to `NULL`, enabling auto-selection between REST and gRPC while letting advanced users force a protocol.
   * Dots (`...`) are reserved for future extensions such as pagination cursors or request options.
 * **Argument types**
-  * Identifiers (`account_id`, `token_id`, `transaction_id`) are stored as character vectors in the Hedera format (e.g., `"0.0.1001"`).
+  * Identifiers (`account_id`, `token_id`, `transaction_id`) are stored as character vectors in the Hedera format (for example the account returned by `accounts_create()` might be `"0.0.4891617"`).
   * Monetary amounts (`amount`, `fee`, `max_fee`) use 64-bit integers via the `bit64::integer64` class to preserve precision.
   * Boolean toggles use bare logicals (`TRUE`/`FALSE`).
   * Timestamps and durations use `POSIXct` and `lubridate::duration` objects respectively.
@@ -153,10 +153,26 @@ accounts <- accounts_list(hadeda_config(network = "testnet")) %>%
   filter(balance_hbar > 100) %>%
   arrange(desc(balance_hbar))
 
+hashio <- hadeda_config(
+  network = "testnet",
+  rest = list(
+    base_url = "https://testnet.hashio.io/api/v1",
+    headers = list(`X-API-Key` = Sys.getenv("HASHIO_API_KEY"))
+  ),
+  default_transport = "rest"
+)
+from_account <- accounts_create(hashio)
+to_account <- accounts_create(hashio)
+new_token <- tokens_create(
+  hashio,
+  name = "Hadeda Demo Token",
+  symbol = "HADEDA",
+  treasury_account_id = from_account$account
+)
 new_transfer <- crypto_transfer(
   hadeda_config(network = "testnet"),
-  from_account = "0.0.1001",
-  to_account = "0.0.2002",
+  from_account = from_account$account,
+  to_account = to_account$account,
   amount = bit64::as.integer64(1e8)
 )
 ```

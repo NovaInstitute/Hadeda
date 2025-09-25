@@ -40,6 +40,42 @@ test_that("tokens_balances returns flattened balances", {
   expect_equal(tbl$account, c("0.0.1001", "0.0.1002"))
 })
 
+test_that("tokens_create posts payload and returns identifiers", {
+  cfg <- hadeda_config(network = "testnet")
+  response <- list(
+    tokenId = "0.0.7001",
+    status = "SUCCESS",
+    transactionId = "0.0.6001-1700000000-000000000"
+  )
+
+  with_mocked_bindings({
+    tbl <- tokens_create(
+      cfg,
+      name = "Hadeda Example",
+      symbol = "HADEDA",
+      treasury_account_id = "0.0.6001",
+      initial_supply = 1000,
+      decimals = 2,
+      memo = "demo"
+    )
+  }, hadeda_rest_post = function(config, path, body = list()) {
+    expect_identical(path, "tokens")
+    expect_equal(body$name, "Hadeda Example")
+    expect_equal(body$symbol, "HADEDA")
+    expect_equal(body$treasuryAccountId, "0.0.6001")
+    expect_equal(body$initialSupply, 1000)
+    expect_equal(body$decimals, 2)
+    expect_equal(body$memo, "demo")
+    response
+  })
+
+  expect_s3_class(tbl, "tbl_df")
+  expect_equal(tbl$token_id, "0.0.7001")
+  expect_equal(tbl$status, "SUCCESS")
+  expect_equal(tbl$transaction_id, "0.0.6001-1700000000-000000000")
+  expect_equal(tbl$response, list(response))
+})
+
 test_that("contracts_get parses contract metadata", {
   cfg <- hadeda_config(network = "testnet")
   response <- list(
