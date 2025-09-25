@@ -39,7 +39,7 @@
 9. ✅ **Token service**
    * Implement token creation, association, and transfer RPC helpers with explicit fee controls and REST fallbacks when possible.
 10. ✅ **Smart contract service**
-    * Provide `contract_call()` and deployment utilities, including contract parameter encoding.
+    * Provide `contract_call()`, deployment utilities, and management/query helpers covering the SmartContractService RPC surface, including contract parameter encoding.
 
 ## Phase 4 – Quality & documentation
 
