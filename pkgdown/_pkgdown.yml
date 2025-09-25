@@ -48,6 +48,8 @@ reference:
       - transactions_list
       - transactions_get
       - consensus_submit_message
+      - consensus_submit_message_chunk
+      - consensus_topic_info
       - topics_get
       - topics_messages
       - topics_message_submit

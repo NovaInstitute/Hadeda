@@ -105,8 +105,8 @@ gRPC helpers land. Each RPC corresponds to a Hadeda verb that consumes a
 | RPC | Description | Hadeda function | Status |
 | --- | --- | --- | --- |
 | `submitMessage` | Submit a topic message | `consensus_submit_message()` | ✅ Implemented |
-| `submitMessageChunk` | Submit chunked message segments | `consensus_submit_message_chunk()` | 🚧 Planned |
-| `getTopicInfo` | Query topic metadata | `consensus_topic_info()` | 🚧 Planned |
+| `submitMessageChunk` | Submit chunked message segments | `consensus_submit_message_chunk()` | ✅ Implemented |
+| `getTopicInfo` | Query topic metadata | `consensus_topic_info()` | ✅ Implemented |
 
 Hadeda will also surface the Mirror Consensus Service streaming subscription via
 `consensus_topic_subscribe()` to maintain parity with SDK streaming APIs.

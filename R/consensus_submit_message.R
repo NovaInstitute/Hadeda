@@ -79,6 +79,86 @@ consensus_submit_message <- function(config,
   hadeda_parse_consensus_responses(topic_id, responses)
 }
 
+#' Submit an individual consensus message chunk
+#'
+#' Publish a pre-chunked payload segment to a Hedera consensus topic using the
+#' gRPC `submitMessageChunk` RPC. Callers provide the chunk sequencing metadata
+#' alongside the message payload, allowing advanced workflows to orchestrate
+#' chunking outside of `consensus_submit_message()`.
+#'
+#' @inheritParams consensus_submit_message
+#' @param chunk_number The position of this chunk within the overall message.
+#' @param total_chunks Total number of chunks composing the full message.
+#' @param initial_transaction_id Identifier returned by Hedera for the initial
+#'   chunk. Required when `total_chunks` exceeds one.
+#'
+#' @return A tibble summarising acknowledgement details for the submitted
+#'   chunk, mirroring the structure returned by `consensus_submit_message()`.
+#'
+#' @export
+consensus_submit_message_chunk <- function(config,
+                                           topic_id,
+                                           message,
+                                           chunk_number,
+                                           total_chunks,
+                                           initial_transaction_id,
+                                           message_type = c("text", "raw", "base64"),
+                                           memo = NULL,
+                                           wait_for_receipt = TRUE,
+                                           .transport = NULL) {
+  transport <- hadeda_choose_transport(
+    config,
+    .transport,
+    rest_supported = FALSE,
+    grpc_supported = TRUE
+  )
+  if (!identical(transport, "grpc")) {
+    cli::cli_abort("consensus_submit_message_chunk() currently supports only the gRPC transport.")
+  }
+
+  if (missing(topic_id) || is.null(topic_id) || identical(topic_id, "")) {
+    cli::cli_abort("`topic_id` is required to submit a consensus message chunk.")
+  }
+  if (missing(message) || is.null(message)) {
+    cli::cli_abort("`message` is required to submit a consensus message chunk.")
+  }
+
+  chunk_number <- as.integer(chunk_number[[1]])
+  total_chunks <- as.integer(total_chunks[[1]])
+  if (!is.finite(chunk_number) || chunk_number <= 0) {
+    cli::cli_abort("`chunk_number` must be a positive integer.")
+  }
+  if (!is.finite(total_chunks) || total_chunks <= 0) {
+    cli::cli_abort("`total_chunks` must be a positive integer.")
+  }
+  if (chunk_number > total_chunks) {
+    cli::cli_abort("`chunk_number` cannot exceed `total_chunks`.")
+  }
+  if (total_chunks > 1L && (missing(initial_transaction_id) || is.null(initial_transaction_id) || identical(initial_transaction_id, ""))) {
+    cli::cli_abort("`initial_transaction_id` is required when submitting chunked messages.")
+  }
+
+  message_type <- rlang::arg_match(message_type)
+  payload <- hadeda_normalise_message_payload(message, message_type)
+
+  chunk_info <- list(
+    number = chunk_number,
+    total = total_chunks,
+    initial_transaction_id = if (total_chunks > 1L) as.character(initial_transaction_id[[1]]) else NULL
+  )
+
+  response <- hadeda_grpc_consensus_submit_message(
+    config = config,
+    topic_id = topic_id,
+    payload = payload,
+    memo = memo,
+    chunk_info = chunk_info,
+    wait_for_receipt = wait_for_receipt
+  )
+
+  hadeda_parse_consensus_responses(topic_id, list(response))
+}
+
 #' @keywords internal
 hadeda_normalise_message_payload <- function(message, message_type) {
   if (identical(message_type, "text")) {
