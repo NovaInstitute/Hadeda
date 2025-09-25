@@ -9,6 +9,11 @@ All planned Hadeda verbs share the signature conventions described in the README
 Each entry below references the upstream capability and the corresponding
 Hadeda function we will implement.
 
+## Coverage snapshot
+
+- **Mirror Node REST:** 16 of 38 documented endpoints now have corresponding Hadeda helpers (≈42% coverage), spanning accounts, blocks, contracts, network metadata, tokens, topics, and transactions.
+- **gRPC services:** Implementation work has not yet started; all RPCs below remain planned stubs.
+
 ## Mirror Node REST endpoints
 
 The Mirror Node API is documented at <https://docs.hedera.com/hedera/mirror-node-api>.
@@ -17,43 +22,46 @@ them to Hadeda functions. When a Mirror Node endpoint corresponds to a gRPC
 query, Hadeda will still provide an HTTP implementation because REST is the most
 widely available transport today.
 
-| Domain | Endpoint | Purpose | Planned Hadeda function |
-| --- | --- | --- | --- |
-| Accounts | `/api/v1/accounts` | List accounts with optional filtering, pagination, and staking metadata | `accounts_list()` |
-| Accounts | `/api/v1/accounts/{accountId}` | Retrieve a single account, including key, memo, staking info | `accounts_get()` |
-| Accounts | `/api/v1/accounts/{accountId}/balance` | Fetch the latest balance snapshot for an account | `accounts_balance()` |
-| Accounts | `/api/v1/accounts/{accountId}/allowances/crypto` | View approved HBAR allowances | `accounts_allowances_crypto()` |
-| Accounts | `/api/v1/accounts/{accountId}/allowances/tokens` | View approved fungible token allowances | `accounts_allowances_tokens()` |
-| Accounts | `/api/v1/accounts/{accountId}/allowances/nfts` | View approved NFT allowances | `accounts_allowances_nfts()` |
-| Accounts | `/api/v1/accounts/{accountId}/rewards` | Retrieve staking reward history | `accounts_rewards()` |
-| Accounts | `/api/v1/balances` | List account balances at a consensus timestamp | `balances_list()` |
-| Blocks | `/api/v1/blocks` | Enumerate blocks with hash, number, and timestamp | `blocks_list()` |
-| Blocks | `/api/v1/blocks/{blockNumberOrHash}` | Retrieve details for a specific block | `blocks_get()` |
-| Contracts | `/api/v1/contracts` | List smart contracts and metadata | `contracts_list()` |
-| Contracts | `/api/v1/contracts/{contractId}` | Fetch contract bytecode and attributes | `contracts_get()` |
-| Contracts | `/api/v1/contracts/{contractId}/results` | List execution results for a contract | `contracts_results()` |
-| Contracts | `/api/v1/contracts/results` | Query contract call results across contracts | `contracts_results_list()` |
-| Contracts | `/api/v1/contracts/results/{transactionId}` | Fetch a single contract execution result | `contracts_results_get()` |
-| Contracts | `/api/v1/contracts/{contractId}/state` | Get key-value state entries for a contract | `contracts_state()` |
-| Network | `/api/v1/network/exchangerate` | Retrieve current and next exchange rates | `network_exchange_rate()` |
-| Network | `/api/v1/network/fees` | Fetch fee schedules | `network_fees()` |
-| Network | `/api/v1/network/nodes` | List mirror and network nodes | `network_nodes()` |
-| Network | `/api/v1/network/supply` | Retrieve supply metrics (hbar total/circulating) | `network_supply()` |
-| Schedules | `/api/v1/schedules` | List scheduled transactions | `schedules_list()` |
-| Schedules | `/api/v1/schedules/{scheduleId}` | Get a scheduled transaction | `schedules_get()` |
-| State Proof | `/api/v1/stateproofs/{transactionId}` | Retrieve a transaction state proof | `stateproof_get()` |
-| Tokens | `/api/v1/tokens` | List tokens with filters | `tokens_list()` |
-| Tokens | `/api/v1/tokens/{tokenId}` | Retrieve token metadata | `tokens_get()` |
-| Tokens | `/api/v1/tokens/{tokenId}/balances` | List token balances by account | `tokens_balances()` |
-| Tokens | `/api/v1/tokens/{tokenId}/nfts` | Enumerate NFTs for a token | `tokens_nfts()` |
-| Tokens | `/api/v1/tokens/{tokenId}/nfts/{serialNumber}` | Fetch a single NFT | `tokens_nfts_get()` |
-| Tokens | `/api/v1/tokens/{tokenId}/nfts/{serialNumber}/transactions` | NFT transfer history | `tokens_nft_transactions()` |
-| Tokens | `/api/v1/tokens/{tokenId}/allowances` | Allowance list for a token | `tokens_allowances()` |
-| Topics | `/api/v1/topics/{topicId}/messages` | Stream topic messages | `topics_messages()` |
-| Transactions | `/api/v1/transactions` | List transactions with filters | `transactions_list()` |
-| Transactions | `/api/v1/transactions/{transactionId}` | Fetch transaction record and metadata | `transactions_get()` |
-| Transactions | `/api/v1/transactions/{transactionId}/stateproof` | Retrieve state proof for a transaction | `transactions_stateproof()` |
-| Transactions | `/api/v1/transactions/{transactionId}/record` | Retrieve detailed record | `transactions_record()` |
+| Domain | Endpoint | Purpose | Hadeda function | Status |
+| --- | --- | --- | --- | --- |
+| Accounts | `/api/v1/accounts` | List accounts with optional filtering, pagination, and staking metadata | `accounts_list()` | ✅ Implemented |
+| Accounts | `/api/v1/accounts/{accountId}` | Retrieve a single account, including key, memo, staking info | `accounts_get()` | ✅ Implemented |
+| Accounts | `/api/v1/accounts/{accountId}/balance` | Fetch the latest balance snapshot for an account | `accounts_balance()` | ✅ Implemented |
+| Accounts | `/api/v1/accounts/{accountId}/allowances/crypto` | View approved HBAR allowances | `accounts_allowances_crypto()` | 🚧 Planned |
+| Accounts | `/api/v1/accounts/{accountId}/allowances/tokens` | View approved fungible token allowances | `accounts_allowances_tokens()` | 🚧 Planned |
+| Accounts | `/api/v1/accounts/{accountId}/allowances/nfts` | View approved NFT allowances | `accounts_allowances_nfts()` | 🚧 Planned |
+| Accounts | `/api/v1/accounts/{accountId}/rewards` | Retrieve staking reward history | `accounts_rewards()` | 🚧 Planned |
+| Accounts | `/api/v1/balances` | List account balances at a consensus timestamp | `balances_list()` | 🚧 Planned |
+| Blocks | `/api/v1/blocks` | Enumerate blocks with hash, number, and timestamp | `blocks_list()` | ✅ Implemented |
+| Blocks | `/api/v1/blocks/{blockNumberOrHash}` | Retrieve details for a specific block | `blocks_get()` | ✅ Implemented |
+| Contracts | `/api/v1/contracts` | List smart contracts and metadata | `contracts_list()` | 🚧 Planned |
+| Contracts | `/api/v1/contracts/{contractId}` | Fetch contract metadata | `contracts_get()` | ✅ Implemented |
+| Contracts | `/api/v1/contracts/{contractId}/bytecode` | Retrieve smart contract bytecode | `contracts_bytecode()` | ✅ Implemented |
+| Contracts | `/api/v1/contracts/{contractId}/results` | List execution results for a contract | `contracts_results()` | 🚧 Planned |
+| Contracts | `/api/v1/contracts/results` | Query contract call results across contracts | `contracts_results_list()` | 🚧 Planned |
+| Contracts | `/api/v1/contracts/results/{transactionId}` | Fetch a single contract execution result | `contracts_results_get()` | 🚧 Planned |
+| Contracts | `/api/v1/contracts/{contractId}/state` | Get key-value state entries for a contract | `contracts_state()` | 🚧 Planned |
+| Network | `/api/v1/network/exchangerate` | Retrieve current and next exchange rates | `network_exchange_rate()` | 🚧 Planned |
+| Network | `/api/v1/network/fees` | Fetch fee schedules | `network_fees()` | 🚧 Planned |
+| Network | `/api/v1/network/nodes` | List mirror and network nodes | `network_nodes()` | ✅ Implemented |
+| Network | `/api/v1/network/stake` | Retrieve network stake metadata | `network_stake()` | ✅ Implemented |
+| Network | `/api/v1/network/supply` | Retrieve supply metrics (hbar total/circulating) | `network_supply()` | 🚧 Planned |
+| Schedules | `/api/v1/schedules` | List scheduled transactions | `schedules_list()` | 🚧 Planned |
+| Schedules | `/api/v1/schedules/{scheduleId}` | Get a scheduled transaction | `schedules_get()` | 🚧 Planned |
+| State Proof | `/api/v1/stateproofs/{transactionId}` | Retrieve a transaction state proof | `stateproof_get()` | 🚧 Planned |
+| Tokens | `/api/v1/tokens` | List tokens with filters | `tokens_list()` | 🚧 Planned |
+| Tokens | `/api/v1/tokens/{tokenId}` | Retrieve token metadata | `tokens_get()` | ✅ Implemented |
+| Tokens | `/api/v1/tokens/{tokenId}/balances` | List token balances by account | `tokens_balances()` | ✅ Implemented |
+| Tokens | `/api/v1/tokens/{tokenId}/nfts` | Enumerate NFTs for a token | `tokens_nfts()` | ✅ Implemented |
+| Tokens | `/api/v1/tokens/{tokenId}/nfts/{serialNumber}` | Fetch a single NFT | `tokens_nfts_get()` | 🚧 Planned |
+| Tokens | `/api/v1/tokens/{tokenId}/nfts/{serialNumber}/transactions` | NFT transfer history | `tokens_nft_transactions()` | 🚧 Planned |
+| Tokens | `/api/v1/tokens/{tokenId}/allowances` | Allowance list for a token | `tokens_allowances()` | 🚧 Planned |
+| Topics | `/api/v1/topics/{topicId}` | Retrieve topic metadata | `topics_get()` | ✅ Implemented |
+| Topics | `/api/v1/topics/{topicId}/messages` | Stream topic messages | `topics_messages()` | ✅ Implemented |
+| Transactions | `/api/v1/transactions` | List transactions with filters | `transactions_list()` | ✅ Implemented |
+| Transactions | `/api/v1/transactions/{transactionId}` | Fetch transaction record and metadata | `transactions_get()` | ✅ Implemented |
+| Transactions | `/api/v1/transactions/{transactionId}/stateproof` | Retrieve state proof for a transaction | `transactions_stateproof()` | 🚧 Planned |
+| Transactions | `/api/v1/transactions/{transactionId}/record` | Retrieve detailed record | `transactions_record()` | 🚧 Planned |
 
 Additional REST helpers planned for parity with official SDK utilities:
 
@@ -67,8 +75,10 @@ Additional REST helpers planned for parity with official SDK utilities:
 
 The official SDKs expose the Hedera gRPC services defined in
 `hedera-protobufs`. Hadeda will mirror these operations with tidyverse-friendly
-functions. Each RPC below will correspond to a Hadeda verb accepting a `.client`
-configured with signing keys and channel information.
+functions. Implementation has not begun yet; the table below tracks the planned
+surface so we can mark progress as gRPC helpers land. Each RPC will correspond to
+a Hadeda verb accepting a `.client` configured with signing keys and channel
+information.
 
 ### Crypto Service (`CryptoService`)
 

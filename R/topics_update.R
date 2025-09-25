@@ -39,7 +39,7 @@ topics_update <- function(config,
   }
 
   resp <- hadeda_rest_post(config, paste0("topics/", topic_id), body)
-  record <- resp$topic %||% resp
+  record <- resp[["topic"]] %||% resp
   parsed <- hadeda_parse_topics(list(record))
 
   status <- resp$status %||% resp$receipt$status %||% NA_character_

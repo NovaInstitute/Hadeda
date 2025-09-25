@@ -34,7 +34,7 @@ topics_create <- function(config,
   ))
 
   resp <- hadeda_rest_post(config, "topics", body)
-  record <- resp$topic %||% resp
+  record <- resp[["topic"]] %||% resp
   parsed <- hadeda_parse_topics(list(record))
 
   status <- resp$status %||% resp$receipt$status %||% NA_character_

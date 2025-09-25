@@ -74,6 +74,31 @@ test_that("topics_get retrieves topic metadata", {
   expect_equal(tbl$auto_renew_account, "0.0.3")
 })
 
+test_that("topics_get flattens nested topic envelopes", {
+  cfg <- hadeda_config(network = "testnet")
+  topic_id <- "0.0.2000"
+  response <- list(
+    topic = list(
+      list(
+        topicId = topic_id,
+        memo = "demo",
+        autoRenewAccount = "0.0.3"
+      )
+    )
+  )
+
+  with_mocked_bindings({
+    tbl <- topics_get(cfg, topic_id)
+  }, hadeda_rest_get = function(config, path, query = list()) {
+    expect_identical(path, paste0("topics/", topic_id))
+    response
+  })
+
+  expect_equal(tbl$topic_id, topic_id)
+  expect_equal(tbl$memo, "demo")
+  expect_equal(tbl$auto_renew_account, "0.0.3")
+})
+
 test_that("topics_create submits payload", {
   cfg <- hadeda_config(network = "testnet")
   record <- list(
