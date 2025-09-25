@@ -26,8 +26,8 @@ hadeda_parse_account_balances <- function(resp) {
   }
 
   tibble::tibble(
-    account = purrr::map_chr(balances, "account", .default = NA_character_),
-    balance = purrr::map_dbl(balances, "balance", .default = NA_real_),
+    account = purrr::map_chr(balances, ~purrr::pluck(.x, "account", .default = NA_character_)),
+    balance = purrr::map_dbl(balances, ~purrr::pluck(.x, "balance", .default = NA_real_)),
     timestamp = hadeda_parse_timestamp(rep(resp$timestamp %||% NA_character_, length(balances))),
     tokens = purrr::map(balances, ~ .x$tokens %||% list())
   )

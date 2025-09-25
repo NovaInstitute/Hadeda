@@ -30,11 +30,11 @@ hadeda_parse_token_nfts <- function(records) {
     ))
   }
 
-  created <- purrr::map_chr(records, "created_timestamp", .default = NA_character_)
-  modified <- purrr::map_chr(records, "modified_timestamp", .default = NA_character_)
+  created <- purrr::map_chr(records, ~purrr::pluck(.x, "created_timestamp", .default = NA_character_))
+  modified <- purrr::map_chr(records, ~purrr::pluck(.x, "modified_timestamp", .default = NA_character_))
 
   tibble::tibble(
-    token_id = purrr::map_chr(records, "token_id", .default = NA_character_),
+    token_id = purrr::map_chr(records, ~purrr::pluck(.x, "token_id", .default = NA_character_)),
     serial_number = purrr::map_int(records, function(record) {
       value <- record$serial_number %||% record$serialNumber %||% NA_integer_
       as.integer(value)

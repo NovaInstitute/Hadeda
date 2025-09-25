@@ -21,8 +21,8 @@ hadeda_parse_token_balances <- function(records) {
   }
 
   tibble::tibble(
-    account = purrr::map_chr(records, "account", .default = NA_character_),
-    balance = purrr::map_dbl(records, "balance", .default = NA_real_),
-    decimals = purrr::map_dbl(records, "decimals", .default = NA_real_)
+    account = purrr::map_chr(records, ~purrr::pluck(.x, "account", .default = NA_character_)),
+    balance = purrr::map_dbl(records, ~purrr::pluck(.x, "balance", .default = NA_real_)),
+    decimals = purrr::map_dbl(records, ~purrr::pluck(.x, "decimals", .default = NA_real_))
   )
 }

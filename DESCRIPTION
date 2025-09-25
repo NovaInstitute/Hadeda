@@ -11,7 +11,7 @@ Description: Hadeda provides tidyverse-oriented wrappers around the Hedera
     Hashgraph Mirror Node REST API and gRPC services. It standardises
     argument names, response schemas, and authentication workflows so
     analysts can interact with Hedera using familiar R conventions.
-License: MIT + file LICENSE
+License: Apache License (>= 2.0)
 URL: https://github.com/hadeda-r/hadeda
 BugReports: https://github.com/hadeda-r/hadeda/issues
 Depends:
