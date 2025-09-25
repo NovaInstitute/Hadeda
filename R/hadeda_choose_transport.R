@@ -35,14 +35,14 @@ hadeda_choose_transport <- function(config, .transport = NULL,
 
   if (choice == "rest" && !rest_supported) {
     cli::cli_abort(
-      "REST transport is not supported for this helper. Please select the gRPC transport.",
+      "This helper requires the gRPC transport; the REST transport is not supported.",
       class = "hadeda_unsupported_transport",
       call = caller
     )
   }
   if (choice == "grpc" && !grpc_supported) {
     cli::cli_abort(
-      "gRPC transport is not supported for this helper. Please select the REST transport.",
+      "This helper requires the REST transport; the gRPC transport is not supported.",
       class = "hadeda_unsupported_transport",
       call = caller
     )
