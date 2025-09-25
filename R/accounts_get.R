@@ -8,10 +8,19 @@
 #' @return A tibble with a single row describing the account.
 #'
 #' @examples
-#' config <- hadeda_config()
-#' account_id <- "0.0.1001"
-#' account <- accounts_get(config = config, account_id = account_id)
-#' account
+#' mirror <- hadeda_config(network = "testnet")
+#' hashio <- hadeda_config(
+#'   network = "testnet",
+#'   rest = list(
+#'     base_url = "https://testnet.hashio.io/api/v1",
+#'     headers = list(`X-API-Key` = Sys.getenv("HASHIO_API_KEY"))
+#'   ),
+#'   default_transport = "rest"
+#' )
+#' \dontrun{
+#'   new_account <- accounts_create(hashio)
+#'   accounts_get(mirror, new_account$account)
+#' }
 #'
 #' @export
 accounts_get <- function(config, account_id, .transport = NULL) {

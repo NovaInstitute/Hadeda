@@ -13,13 +13,30 @@
 #' @return A tibble of transactions.
 #'
 #' @examples
-#' config <- hadeda_config()
-#' transactions <- transactions_list(
-#'   config = config,
-#'   limit = 10,
-#'   transaction_type = "CRYPTOTRANSFER"
+#' mirror <- hadeda_config(network = "testnet")
+#' hashio <- hadeda_config(
+#'   network = "testnet",
+#'   rest = list(
+#'     base_url = "https://testnet.hashio.io/api/v1",
+#'     headers = list(`X-API-Key` = Sys.getenv("HASHIO_API_KEY"))
+#'   ),
+#'   default_transport = "rest"
 #' )
-#' transactions
+#' \dontrun{
+#'   new_account <- accounts_create(hashio)
+#'   new_token <- tokens_create(
+#'     hashio,
+#'     name = "Hadeda Example",
+#'     symbol = "HADEDA",
+#'     treasury_account_id = new_account$account
+#'   )
+#'   transactions_list(
+#'     config = mirror,
+#'     limit = 10,
+#'     account_id = new_account$account,
+#'     transaction_type = "TOKENCREATION"
+#'   )
+#' }
 #'
 #' @export
 transactions_list <- function(config,

@@ -10,14 +10,30 @@
 #' @return A tibble of token balances.
 #'
 #' @examples
-#' config <- hadeda_config()
-#' token_id <- "0.0.1001"
-#' balances <- tokens_balances(
-#'   config = config,
-#'   token_id = token_id,
-#'   limit = 10
+#' mirror <- hadeda_config(network = "testnet")
+#' hashio <- hadeda_config(
+#'   network = "testnet",
+#'   rest = list(
+#'     base_url = "https://testnet.hashio.io/api/v1",
+#'     headers = list(`X-API-Key` = Sys.getenv("HASHIO_API_KEY"))
+#'   ),
+#'   default_transport = "rest"
 #' )
-#' balances
+#' \dontrun{
+#'   new_account <- accounts_create(hashio)
+#'   new_token <- tokens_create(
+#'     hashio,
+#'     name = "Hadeda Example",
+#'     symbol = "HADEDA",
+#'     treasury_account_id = new_account$account
+#'   )
+#'   tokens_balances(
+#'     config = mirror,
+#'     token_id = new_token$token_id,
+#'     limit = 10,
+#'     account_id = new_account$account
+#'   )
+#' }
 #'
 #' @export
 tokens_balances <- function(config,

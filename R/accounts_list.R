@@ -14,13 +14,19 @@
 #' @return A tibble of accounts with balance metadata.
 #'
 #' @examples
-#' config <- hadeda_config(network = "testnet")
-#' accounts <- accounts_list(
-#'   config = config,
-#'   limit = 5,
-#'   account_id = "0.0.1001"
+#' mirror <- hadeda_config(network = "testnet")
+#' hashio <- hadeda_config(
+#'   network = "testnet",
+#'   rest = list(
+#'     base_url = "https://testnet.hashio.io/api/v1",
+#'     headers = list(`X-API-Key` = Sys.getenv("HASHIO_API_KEY"))
+#'   ),
+#'   default_transport = "rest"
 #' )
-#' accounts
+#' \dontrun{
+#'   new_account <- accounts_create(hashio)
+#'   accounts_list(mirror, account_id = new_account$account)
+#' }
 #'
 #' @export
 accounts_list <- function(config,
