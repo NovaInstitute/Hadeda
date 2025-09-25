@@ -48,8 +48,8 @@ widely available transport today.
 | Network | `/api/v1/network/nodes` | List mirror and network nodes | `network_nodes()` | ✅ Implemented |
 | Network | `/api/v1/network/stake` | Retrieve network stake metadata | `network_stake()` | ✅ Implemented |
 | Network | `/api/v1/network/supply` | Retrieve supply metrics (hbar total/circulating) | `network_supply()` | 🚧 Planned |
-| Schedules | `/api/v1/schedules` | List scheduled transactions | `schedules_list()` | 🚧 Planned |
-| Schedules | `/api/v1/schedules/{scheduleId}` | Get a scheduled transaction | `schedules_get()` | 🚧 Planned |
+| Schedules | `/api/v1/schedules` | List scheduled transactions | `schedules_list()` | ✅ Implemented |
+| Schedules | `/api/v1/schedules/{scheduleId}` | Get a scheduled transaction | `schedules_get()` | ✅ Implemented |
 | State Proof | `/api/v1/stateproofs/{transactionId}` | Retrieve a transaction state proof | `stateproof_get()` | 🚧 Planned |
 | Tokens | `/api/v1/tokens` | List tokens with filters | `tokens_list()` | 🚧 Planned |
 | Tokens | `/api/v1/tokens/{tokenId}` | Retrieve token metadata | `tokens_get()` | ✅ Implemented |
