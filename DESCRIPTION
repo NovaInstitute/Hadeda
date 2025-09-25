@@ -18,6 +18,7 @@ Depends:
     R (>= 4.2)
 Imports:
     cli,
+    digest,
     httr2,
     jsonlite,
     lubridate,

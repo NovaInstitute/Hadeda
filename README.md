@@ -60,20 +60,21 @@ Additional streaming helpers such as `topics_messages_stream()` and
 `consensus_topic_subscribe()` will wrap the Mirror Node streaming APIs so that R
 workflows remain on par with JavaScript SDK capabilities.
 
-The initial CryptoService implementation now ships with working
-`crypto_create_account()`, `crypto_transfer()`, and
-`crypto_update_account_keys()` helpers. These functions accept tidy inputs,
-delegate to user-provided gRPC handlers, and return acknowledgement tibbles that
-mirror the rest of the package.
+The initial gRPC surface now includes `crypto_create_account()`,
+`crypto_transfer()`, `crypto_update_account_keys()`, `tokens_create()`,
+`tokens_associate()`, `tokens_transfer()`, `contract_deploy()`,
+`contract_call()`, and the REST-backed `consensus_submit_message()`. These
+functions accept tidy inputs, delegate to user-provided gRPC handlers, and
+return acknowledgement tibbles that mirror the rest of the package.
 
 ## Naming and argument conventions
 
 * **Function names**
   * Use a `<domain>_<verb>()` pattern (e.g., `accounts_list()`, `crypto_transfer()`), mirroring tidyverse verbs such as `list`, `get`, `create`, `update`, and `delete`.
   * REST query helpers use plural domains (`accounts`, `tokens`, `transactions`), while RPC mutation helpers use the service namespace (`crypto`, `token`, `consensus`).
-  * For dual-transport verbs, the same function name orchestrates the request builder for both REST and gRPC, with the transport inferred from the `.client` configuration or an explicit `.transport` argument.
+  * For dual-transport verbs, the same function name orchestrates the request builder for both REST and gRPC, with the transport inferred from the Hadeda configuration or an explicit `.transport` argument.
 * **Argument order**
-  * The first argument is always `.client`, representing an S3 class containing connection settings (REST base URL, gRPC channel, credentials, throttling options).
+  * The first argument is always `config`, a list created by `hadeda_config()` that contains REST settings (base URL, headers, rate limits) and gRPC handlers.
   * Endpoint-specific arguments follow, using snake_case names that match API query parameters or protobuf field names.
   * A `.transport` argument defaults to `NULL`, enabling auto-selection between REST and gRPC while letting advanced users force a protocol.
   * Dots (`...`) are reserved for future extensions such as pagination cursors or request options.
@@ -91,9 +92,9 @@ mirror the rest of the package.
 
 ## Dual transport orchestration
 
-Hadeda functions negotiate between REST and gRPC using the `.client` object, which stores both REST configuration (base URL, rate limits) and gRPC configuration (channel, TLS, signing keys). Each verb performs the following steps:
+Hadeda functions negotiate between REST and gRPC using the configuration object returned by `hadeda_config()`, which stores both REST settings (base URL, rate limits) and gRPC configuration (channel, TLS, signing keys). Each verb performs the following steps:
 
-1. Determine the preferred transport by inspecting `.client$default_transport` and honoring an optional `.transport` override passed by the caller.
+1. Determine the preferred transport by inspecting `config$default_transport` and honoring an optional `.transport` override passed by the caller.
 2. Build a tidy list of request parameters using the same snake_case arguments for either transport.
 3. Dispatch to `hadeda_request_rest()` or `hadeda_request_grpc()` internals that know how to translate the parameter list into HTTP query strings or protobuf messages.
 4. Normalize the response into a tibble using shared post-processing helpers so that pipelines such as `accounts_list(...) |> select(account_id, balance_hbar)` behave identically.
@@ -101,15 +102,17 @@ Hadeda functions negotiate between REST and gRPC using the `.client` object, whi
 This design allows analytical workflows to stay idiomatic:
 
 ```r
-accounts_list(client) |> 
-  mutate(balance_hbar = balance_tinybar / 1e8) |> 
+cfg <- hadeda_config(network = "testnet")
+
+accounts_list(cfg) |>
+  mutate(balance_hbar = balance_tinybar / 1e8) |>
   arrange(desc(balance_hbar))
 
-crypto_transfer(client, from_account, to_account, amount) |> 
+crypto_transfer(cfg, from_account, to_account, amount) |>
   tidyr::unnest_wider(receipt)
 ```
 
-In both examples the same verbs work whether `client` points to a REST-only mirror node, a gRPC-enabled node, or a hybrid configuration.
+In both examples the same verbs work whether `config` points to a REST-only mirror node, a gRPC-enabled node, or a hybrid configuration.
 
 ## Supporting utilities
 

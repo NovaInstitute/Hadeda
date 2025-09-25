@@ -69,6 +69,12 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
+    "digest": {
+      "Package": "digest",
+      "Version": "0.6.34",
+      "Source": "Repository",
+      "Repository": "CRAN"
+    },
     "httptest2": {
       "Package": "httptest2",
       "Version": "0.5.0",

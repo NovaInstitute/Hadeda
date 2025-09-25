@@ -12,7 +12,9 @@ Hadeda function we will implement.
 ## Coverage snapshot
 
 - **Mirror Node REST:** 16 of 38 documented endpoints now have corresponding Hadeda helpers (≈42% coverage), spanning accounts, blocks, contracts, network metadata, tokens, topics, and transactions.
-- **gRPC services:** Implementation work has not yet started; all RPCs below remain planned stubs.
+- **gRPC services:** Consensus topic submission plus the initial CryptoService (account create, transfer, key update),
+TokenService (create, associate, transfer), and SmartContractService (deploy, call) helpers are live; the remaining RPCs below
+remain planned stubs.
 
 ## Mirror Node REST endpoints
 
@@ -75,89 +77,88 @@ Additional REST helpers planned for parity with official SDK utilities:
 
 The official SDKs expose the Hedera gRPC services defined in
 `hedera-protobufs`. Hadeda will mirror these operations with tidyverse-friendly
-functions. Implementation has not begun yet; the table below tracks the planned
-surface so we can mark progress as gRPC helpers land. Each RPC will correspond to
-a Hadeda verb accepting a `.client` configured with signing keys and channel
-information.
+functions. The tables below track the planned surface so we can mark progress as
+gRPC helpers land. Each RPC corresponds to a Hadeda verb that consumes a
+`hadeda_config()` object with signing keys and channel information.
 
 ### Crypto Service (`CryptoService`)
 
-| RPC | Description | Planned Hadeda function |
-| --- | --- | --- |
-| `createAccount` | Create an account | `crypto_create_account()` |
-| `updateAccount` | Update mutable account properties | `crypto_update_account()` |
-| `cryptoTransfer` | Transfer hbar or tokens between accounts | `crypto_transfer()` |
-| `cryptoDelete` | Delete an account and transfer remaining balance | `crypto_delete()` |
-| `approveAllowances` | Approve fungible/NFT allowances | `crypto_approve_allowances()` |
-| `deleteAllowances` | Revoke allowances | `crypto_delete_allowances()` |
-| `getAccountRecords` | Query account transaction records | `crypto_account_records()` |
-| `getAccountBalance` | Query account balance | `crypto_account_balance()` |
-| `getAccountInfo` | Query account metadata | `crypto_account_info()` |
-| `getTransactionReceipts` | Get receipts by transaction ID | `crypto_transaction_receipts()` |
-| `getTransactionRecord` | Get a single transaction record | `crypto_transaction_record()` |
-| `getTransactionRecords` | Get paged transaction records | `crypto_transaction_records()` |
-| `getAccountDetails` | Rich account metadata (HIP-623) | `crypto_account_details()` |
-| Deprecated live hash RPCs | Exposed for completeness but throw `NOT_SUPPORTED` | `crypto_livehash_*()` (internal stubs) |
+| RPC | Description | Hadeda function | Status |
+| --- | --- | --- | --- |
+| `createAccount` | Create an account | `crypto_create_account()` | ✅ Implemented |
+| `updateAccount` | Update mutable account properties | `crypto_update_account()` | 🚧 Planned |
+| `cryptoTransfer` | Transfer hbar or tokens between accounts | `crypto_transfer()` | ✅ Implemented |
+| `cryptoDelete` | Delete an account and transfer remaining balance | `crypto_delete()` | 🚧 Planned |
+| `approveAllowances` | Approve fungible/NFT allowances | `crypto_approve_allowances()` | 🚧 Planned |
+| `deleteAllowances` | Revoke allowances | `crypto_delete_allowances()` | 🚧 Planned |
+| `getAccountRecords` | Query account transaction records | `crypto_account_records()` | 🚧 Planned |
+| `getAccountBalance` | Query account balance | `crypto_account_balance()` | 🚧 Planned |
+| `getAccountInfo` | Query account metadata | `crypto_account_info()` | 🚧 Planned |
+| `getTransactionReceipts` | Get receipts by transaction ID | `crypto_transaction_receipts()` | 🚧 Planned |
+| `getTransactionRecord` | Get a single transaction record | `crypto_transaction_record()` | 🚧 Planned |
+| `getTransactionRecords` | Get paged transaction records | `crypto_transaction_records()` | 🚧 Planned |
+| `getAccountDetails` | Rich account metadata (HIP-623) | `crypto_account_details()` | 🚧 Planned |
+| Deprecated live hash RPCs | Exposed for completeness but throw `NOT_SUPPORTED` | `crypto_livehash_*()` (internal stubs) | 🚧 Planned |
 
 ### Consensus Service (`ConsensusService`)
 
-| RPC | Description | Planned Hadeda function |
-| --- | --- | --- |
-| `submitMessage` | Submit a topic message | `consensus_submit_message()` |
-| `submitMessageChunk` | Submit chunked message segments | `consensus_submit_message_chunk()` |
-| `getTopicInfo` | Query topic metadata | `consensus_topic_info()` |
+| RPC | Description | Hadeda function | Status |
+| --- | --- | --- | --- |
+| `submitMessage` | Submit a topic message | `consensus_submit_message()` | ✅ Implemented |
+| `submitMessageChunk` | Submit chunked message segments | `consensus_submit_message_chunk()` | 🚧 Planned |
+| `getTopicInfo` | Query topic metadata | `consensus_topic_info()` | 🚧 Planned |
 
 Hadeda will also surface the Mirror Consensus Service streaming subscription via
 `consensus_topic_subscribe()` to maintain parity with SDK streaming APIs.
 
 ### File Service (`FileService`)
 
-| RPC | Description | Planned Hadeda function |
-| --- | --- | --- |
-| `createFile` | Create a new file | `file_create()` |
-| `updateFile` | Update file contents or keys | `file_update()` |
-| `deleteFile` | Delete a file | `file_delete()` |
-| `appendContent` | Append contents to a file | `file_append()` |
-| `getFileContent` | Download file contents | `file_content()` |
-| `getFileInfo` | Retrieve file metadata | `file_info()` |
+| RPC | Description | Hadeda function | Status |
+| --- | --- | --- | --- |
+| `createFile` | Create a new file | `file_create()` | 🚧 Planned |
+| `updateFile` | Update file contents or keys | `file_update()` | 🚧 Planned |
+| `deleteFile` | Delete a file | `file_delete()` | 🚧 Planned |
+| `appendContent` | Append contents to a file | `file_append()` | 🚧 Planned |
+| `getFileContent` | Download file contents | `file_content()` | 🚧 Planned |
+| `getFileInfo` | Retrieve file metadata | `file_info()` | 🚧 Planned |
 
 ### Smart Contract Service (`SmartContractService`)
 
-| RPC | Description | Planned Hadeda function |
-| --- | --- | --- |
-| `createContract` | Deploy a smart contract | `contract_create()` |
-| `updateContract` | Update contract properties | `contract_update()` |
-| `contractCallMethod` | Execute a contract call | `contract_call()` |
-| `contractCallLocalMethod` | Local query (no state change) | `contract_call_local()` |
-| `deleteContract` | Delete a contract | `contract_delete()` |
-| `getContractInfo` | Query contract metadata | `contract_info()` |
-| `getContractRecords` | Fetch contract transaction records | `contract_records()` |
-| `getTxRecordByContractID` | Fetch records by contract ID | `contract_tx_record_by_id()` |
+| RPC | Description | Hadeda function | Status |
+| --- | --- | --- | --- |
+| `createContract` | Deploy a smart contract | `contract_deploy()` | ✅ Implemented |
+| `updateContract` | Update contract properties | `contract_update()` | 🚧 Planned |
+| `contractCallMethod` | Execute a contract call | `contract_call()` | ✅ Implemented |
+| `contractCallLocalMethod` | Local query (no state change) | `contract_call_local()` | 🚧 Planned |
+| `deleteContract` | Delete a contract | `contract_delete()` | 🚧 Planned |
+| `getContractInfo` | Query contract metadata | `contract_info()` | 🚧 Planned |
+| `getContractRecords` | Fetch contract transaction records | `contract_records()` | 🚧 Planned |
+| `getTxRecordByContractID` | Fetch records by contract ID | `contract_tx_record_by_id()` | 🚧 Planned |
 
 ### Token Service (`TokenService`)
 
-| RPC | Description | Planned Hadeda function |
-| --- | --- | --- |
-| `createToken` | Create fungible/NFT tokens | `token_create()` |
-| `updateToken` | Update token properties | `token_update()` |
-| `mintToken` | Mint new token units/NFTs | `token_mint()` |
-| `burnToken` | Burn token units/NFTs | `token_burn()` |
-| `deleteToken` | Delete a token | `token_delete()` |
-| `wipeTokenAccount` | Wipe an account's token balance | `token_wipe_account()` |
-| `freezeTokenAccount` | Freeze token for an account | `token_freeze_account()` |
-| `unfreezeTokenAccount` | Unfreeze token for an account | `token_unfreeze_account()` |
-| `grantKycToTokenAccount` | Grant KYC | `token_grant_kyc()` |
-| `revokeKycFromTokenAccount` | Revoke KYC | `token_revoke_kyc()` |
-| `associateTokens` | Associate fungible tokens | `token_associate()` |
-| `dissociateTokens` | Dissociate fungible tokens | `token_dissociate()` |
-| `approveTokenAllowance` | Approve token allowance | `token_approve_allowance()` |
-| `deleteTokenAllowance` | Revoke token allowance | `token_delete_allowance()` |
-| `getTokenInfo` | Query token metadata | `token_info()` |
-| `getTokenNftInfo` | Query NFT metadata | `token_nft_info()` |
-| `getTokenNftInfos` | List NFTs | `token_nft_infos()` |
-| `getAccountNftInfos` | List NFTs owned by an account | `token_account_nft_infos()` |
-| `getTokenNftTransferHistory` | NFT transfer history | `token_nft_transfer_history()` |
-| `getTokenRelationships` | Query account-token relationships | `token_relationships()` |
+| RPC | Description | Hadeda function | Status |
+| --- | --- | --- | --- |
+| `createToken` | Create fungible/NFT tokens | `tokens_create()` | ✅ Implemented |
+| `updateToken` | Update token properties | `tokens_update()` | 🚧 Planned |
+| `mintToken` | Mint new token units/NFTs | `tokens_mint()` | 🚧 Planned |
+| `burnToken` | Burn token units/NFTs | `tokens_burn()` | 🚧 Planned |
+| `deleteToken` | Delete a token | `tokens_delete()` | 🚧 Planned |
+| `wipeTokenAccount` | Wipe an account's token balance | `tokens_wipe_account()` | 🚧 Planned |
+| `freezeTokenAccount` | Freeze token for an account | `tokens_freeze_account()` | 🚧 Planned |
+| `unfreezeTokenAccount` | Unfreeze token for an account | `tokens_unfreeze_account()` | 🚧 Planned |
+| `grantKycToTokenAccount` | Grant KYC | `tokens_grant_kyc()` | 🚧 Planned |
+| `revokeKycFromTokenAccount` | Revoke KYC | `tokens_revoke_kyc()` | 🚧 Planned |
+| `associateTokens` | Associate fungible tokens | `tokens_associate()` | ✅ Implemented |
+| `dissociateTokens` | Dissociate fungible tokens | `tokens_dissociate()` | 🚧 Planned |
+| `approveTokenAllowance` | Approve token allowance | `tokens_approve_allowance()` | 🚧 Planned |
+| `deleteTokenAllowance` | Revoke token allowance | `tokens_delete_allowance()` | 🚧 Planned |
+| `getTokenInfo` | Query token metadata | `tokens_info()` | 🚧 Planned |
+| `getTokenNftInfo` | Query NFT metadata | `tokens_nft_info()` | 🚧 Planned |
+| `getTokenNftInfos` | List NFTs | `tokens_nft_infos()` | 🚧 Planned |
+| `getAccountNftInfos` | List NFTs owned by an account | `tokens_account_nft_infos()` | 🚧 Planned |
+| `getTokenNftTransferHistory` | NFT transfer history | `tokens_nft_transfer_history()` | 🚧 Planned |
+| `getTokenRelationships` | Query account-token relationships | `tokens_relationships()` | 🚧 Planned |
 
 ### Schedule Service (`ScheduleService`)
 
