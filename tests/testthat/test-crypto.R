@@ -45,7 +45,7 @@ test_that("crypto_create_account delegates to gRPC handler", {
     status = "OK",
     receipt = list(status = "SUCCESS", accountId = "0.0.5005"),
     consensusTimestamp = "1700000000.000000000",
-    accountInfo = list(key = list(_type = "ED25519", key = "abcd"))
+    accountInfo = list(key = list("_type" = "ED25519", key = "abcd"))
   )
 
   calls <- list()
