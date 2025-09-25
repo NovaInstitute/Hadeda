@@ -1,4 +1,5 @@
 library(testthat)
 library(hadeda)
 
-test_check("hadeda")
+testthat::test_local()
+
