@@ -13,7 +13,7 @@ Hadeda function we will implement.
 
 - **Mirror Node REST:** 19 of 38 documented endpoints now have corresponding Hadeda helpers (≈50% coverage), spanning accounts, blocks, contracts, network metadata, tokens, topics, and transactions.
 - **gRPC services:** Consensus topic submission plus full CryptoService coverage (account lifecycle, transfers, allowances, and
-query helpers), TokenService (create, associate, transfer), and SmartContractService (deploy, call) helpers are live; the
+query helpers), TokenService (create, associate, transfer), and SmartContractService helpers (deploy, mutate, query) are live; the
 remaining RPCs below remain planned stubs.
 
 ## Mirror Node REST endpoints
@@ -127,13 +127,13 @@ Hadeda will also surface the Mirror Consensus Service streaming subscription via
 | RPC | Description | Hadeda function | Status |
 | --- | --- | --- | --- |
 | `createContract` | Deploy a smart contract | `contract_deploy()` | ✅ Implemented |
-| `updateContract` | Update contract properties | `contract_update()` | 🚧 Planned |
+| `updateContract` | Update contract properties | `contract_update()` | ✅ Implemented |
 | `contractCallMethod` | Execute a contract call | `contract_call()` | ✅ Implemented |
-| `contractCallLocalMethod` | Local query (no state change) | `contract_call_local()` | 🚧 Planned |
-| `deleteContract` | Delete a contract | `contract_delete()` | 🚧 Planned |
-| `getContractInfo` | Query contract metadata | `contract_info()` | 🚧 Planned |
-| `getContractRecords` | Fetch contract transaction records | `contract_records()` | 🚧 Planned |
-| `getTxRecordByContractID` | Fetch records by contract ID | `contract_tx_record_by_id()` | 🚧 Planned |
+| `contractCallLocalMethod` | Local query (no state change) | `contract_call_local()` | ✅ Implemented |
+| `deleteContract` | Delete a contract | `contract_delete()` | ✅ Implemented |
+| `getContractInfo` | Query contract metadata | `contract_info()` | ✅ Implemented |
+| `getContractRecords` | Fetch contract transaction records | `contract_records()` | ✅ Implemented |
+| `getTxRecordByContractID` | Fetch records by contract ID | `contract_tx_record_by_id()` | ✅ Implemented |
 
 ### Token Service (`TokenService`)
 
