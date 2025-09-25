@@ -63,12 +63,15 @@ Additional streaming helpers such as `topics_messages_stream()` and
 `consensus_topic_subscribe()` will wrap the Mirror Node streaming APIs so that R
 workflows remain on par with JavaScript SDK capabilities.
 
-The initial gRPC surface now includes `crypto_create_account()`,
-`crypto_transfer()`, `crypto_update_account_keys()`, `tokens_create()`,
-`tokens_associate()`, `tokens_transfer()`, `contract_deploy()`,
-`contract_call()`, and the REST-backed `consensus_submit_message()`. These
-functions accept tidy inputs, delegate to user-provided gRPC handlers, and
-return acknowledgement tibbles that mirror the rest of the package.
+The initial gRPC surface now spans the full CryptoService (`crypto_create_account()`,
+`crypto_update_account()`, `crypto_update_account_keys()`, `crypto_transfer()`,
+`crypto_delete()`, allowance helpers, and the various account/transaction
+queries), alongside TokenService helpers (`tokens_create()`, `tokens_associate()`,
+`tokens_transfer()`), SmartContractService deployment and execution utilities
+(`contract_deploy()`, `contract_call()`), and the REST-backed
+`consensus_submit_message()`. These functions accept tidy inputs, delegate to
+user-provided gRPC handlers, and return acknowledgement tibbles that mirror the
+rest of the package.
 
 ## Naming and argument conventions
 

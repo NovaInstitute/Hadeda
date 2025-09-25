@@ -12,9 +12,9 @@ Hadeda function we will implement.
 ## Coverage snapshot
 
 - **Mirror Node REST:** 19 of 38 documented endpoints now have corresponding Hadeda helpers (≈50% coverage), spanning accounts, blocks, contracts, network metadata, tokens, topics, and transactions.
-- **gRPC services:** Consensus topic submission plus the initial CryptoService (account create, transfer, key update),
-TokenService (create, associate, transfer), and SmartContractService (deploy, call) helpers are live; the remaining RPCs below
-remain planned stubs.
+- **gRPC services:** Consensus topic submission plus full CryptoService coverage (account lifecycle, transfers, allowances, and
+query helpers), TokenService (create, associate, transfer), and SmartContractService (deploy, call) helpers are live; the
+remaining RPCs below remain planned stubs.
 
 ## Mirror Node REST endpoints
 
@@ -86,19 +86,19 @@ gRPC helpers land. Each RPC corresponds to a Hadeda verb that consumes a
 | RPC | Description | Hadeda function | Status |
 | --- | --- | --- | --- |
 | `createAccount` | Create an account | `crypto_create_account()` | ✅ Implemented |
-| `updateAccount` | Update mutable account properties | `crypto_update_account()` | 🚧 Planned |
+| `updateAccount` | Update mutable account properties | `crypto_update_account()` | ✅ Implemented |
 | `cryptoTransfer` | Transfer hbar or tokens between accounts | `crypto_transfer()` | ✅ Implemented |
-| `cryptoDelete` | Delete an account and transfer remaining balance | `crypto_delete()` | 🚧 Planned |
-| `approveAllowances` | Approve fungible/NFT allowances | `crypto_approve_allowances()` | 🚧 Planned |
-| `deleteAllowances` | Revoke allowances | `crypto_delete_allowances()` | 🚧 Planned |
-| `getAccountRecords` | Query account transaction records | `crypto_account_records()` | 🚧 Planned |
-| `getAccountBalance` | Query account balance | `crypto_account_balance()` | 🚧 Planned |
-| `getAccountInfo` | Query account metadata | `crypto_account_info()` | 🚧 Planned |
-| `getTransactionReceipts` | Get receipts by transaction ID | `crypto_transaction_receipts()` | 🚧 Planned |
-| `getTransactionRecord` | Get a single transaction record | `crypto_transaction_record()` | 🚧 Planned |
-| `getTransactionRecords` | Get paged transaction records | `crypto_transaction_records()` | 🚧 Planned |
-| `getAccountDetails` | Rich account metadata (HIP-623) | `crypto_account_details()` | 🚧 Planned |
-| Deprecated live hash RPCs | Exposed for completeness but throw `NOT_SUPPORTED` | `crypto_livehash_*()` (internal stubs) | 🚧 Planned |
+| `cryptoDelete` | Delete an account and transfer remaining balance | `crypto_delete()` | ✅ Implemented |
+| `approveAllowances` | Approve fungible/NFT allowances | `crypto_approve_allowances()` | ✅ Implemented |
+| `deleteAllowances` | Revoke allowances | `crypto_delete_allowances()` | ✅ Implemented |
+| `getAccountRecords` | Query account transaction records | `crypto_account_records()` | ✅ Implemented |
+| `getAccountBalance` | Query account balance | `crypto_account_balance()` | ✅ Implemented |
+| `getAccountInfo` | Query account metadata | `crypto_account_info()` | ✅ Implemented |
+| `getTransactionReceipts` | Get receipts by transaction ID | `crypto_transaction_receipts()` | ✅ Implemented |
+| `getTransactionRecord` | Get a single transaction record | `crypto_transaction_record()` | ✅ Implemented |
+| `getTransactionRecords` | Get paged transaction records | `crypto_transaction_records()` | ✅ Implemented |
+| `getAccountDetails` | Rich account metadata (HIP-623) | `crypto_account_details()` | ✅ Implemented |
+| Deprecated live hash RPCs | Exposed for completeness but throw `NOT_SUPPORTED` | `crypto_livehash_*()` (internal stubs) | ✅ Implemented |
 
 ### Consensus Service (`ConsensusService`)
 
