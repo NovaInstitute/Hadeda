@@ -29,10 +29,10 @@ hadeda_parse_transactions <- function(records) {
   }
 
   tibble::tibble(
-    transaction_id = purrr::map_chr(records, "transaction_id", .default = NA_character_),
-    consensus_timestamp = hadeda_parse_timestamp(purrr::map_chr(records, "consensus_timestamp", .default = NA_character_)),
-    name = purrr::map_chr(records, "name", .default = NA_character_),
-    valid_start = hadeda_parse_timestamp(purrr::map_chr(records, "valid_start_timestamp", .default = NA_character_)),
-    charged_tx_fee = purrr::map_dbl(records, "charged_tx_fee", .default = NA_real_)
+    transaction_id = purrr::map_chr(records, ~purrr::pluck(.x, "transaction_id", .default = NA_character_)),
+    consensus_timestamp = hadeda_parse_timestamp(purrr::map_chr(records, ~purrr::pluck(.x, "consensus_timestamp", .default = NA_character_))),
+    name = purrr::map_chr(records, ~purrr::pluck(.x, "name", .default = NA_character_)),
+    valid_start = hadeda_parse_timestamp(purrr::map_chr(records, ~purrr::pluck(.x, "valid_start_timestamp", .default = NA_character_))),
+    charged_tx_fee = purrr::map_dbl(records, ~purrr::pluck(.x, "charged_tx_fee", .default = NA_real_))
   )
 }

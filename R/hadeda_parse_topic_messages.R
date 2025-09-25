@@ -29,10 +29,10 @@ hadeda_parse_topic_messages <- function(records) {
   }
 
   tibble::tibble(
-    topic_id = purrr::map_chr(records, "topic_id", .default = NA_character_),
-    consensus_timestamp = hadeda_parse_timestamp(purrr::map_chr(records, "consensus_timestamp", .default = NA_character_)),
-    message = purrr::map_chr(records, "message", .default = NA_character_),
-    running_hash = purrr::map_chr(records, "running_hash", .default = NA_character_),
-    sequence_number = purrr::map_dbl(records, "sequence_number", .default = NA_real_)
+    topic_id = purrr::map_chr(records, ~purrr::pluck(.x, "topic_id", .default = NA_character_)),
+    consensus_timestamp = hadeda_parse_timestamp(purrr::map_chr(records, ~purrr::pluck(.x, "consensus_timestamp", .default = NA_character_))),
+    message = purrr::map_chr(records, ~purrr::pluck(.x, "message", .default = NA_character_)),
+    running_hash = purrr::map_chr(records, ~purrr::pluck(.x, "running_hash", .default = NA_character_)),
+    sequence_number = purrr::map_dbl(records, ~purrr::pluck(.x, "sequence_number", .default = NA_real_))
   )
 }
