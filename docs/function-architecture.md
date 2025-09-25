@@ -89,3 +89,23 @@ construction behave deterministically.
    publish rendered Rd files in `man/`.
 4. Begin implementing Phase 1, Step 3 utilities (HTTP/gRPC helper
    layer) using the scaffolding delivered here.
+
+## Phase 3 progress
+
+The Phase 3 buildout introduces initial CryptoService coverage alongside the
+Consensus submit helper delivered earlier. Newly implemented verbs include:
+
+- `crypto_create_account()` – chooses between a gRPC mutation and the existing
+  REST `accounts_create()` fallback, returning tidy acknowledgement metadata.
+- `crypto_transfer()` – normalises hbar and token transfer payloads before
+  delegating to the configured gRPC transport and parsing the resulting
+  receipt.
+- `crypto_update_account_keys()` – updates account signing keys via gRPC while
+  enforcing minimal validation around account identifiers and supplied key
+  material.
+
+Supporting internals convert tidy data frames into the list-based payloads
+expected by gRPC handlers and collapse mutation responses into consistent
+tibbles. The accompanying test suite exercises normalisation paths, transport
+selection, and error handling so future transport implementations can plug in
+with confidence.
