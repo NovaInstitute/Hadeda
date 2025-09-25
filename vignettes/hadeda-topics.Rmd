@@ -1,0 +1,80 @@
+---
+title: "Working with Hedera topics"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Working with Hedera topics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+Consensus topics allow distributed applications to publish ordered messages on
+the Hedera network. Hadeda offers helpers for reading historical messages via
+REST and submitting new messages via gRPC.
+
+## Reading topic history
+
+`topics_messages()` queries the mirror node for historical messages. The helper
+supports cursor-based pagination and returns a tibble with timestamps, sequence
+numbers, and decoded payloads.
+
+```{r}
+mirror <- hadeda_config(network = "testnet", default_transport = "rest")
+
+recent <- topics_messages(
+  mirror,
+  topic_id = "0.0.1234",
+  limit = 25,
+  order = "desc"
+)
+
+recent |> dplyr::select(sequence_number, consensus_timestamp, message)
+```
+
+Use `topics_get()` to fetch metadata about the topic, including submit key and
+auto-renew configuration:
+
+```{r}
+topic <- topics_get(mirror, topic_id = "0.0.1234")
+
+topic
+```
+
+## Submitting messages
+
+Message submission requires gRPC support and the ability to sign transactions.
+You can register a `config$grpc$submit_message` handler that takes the message
+payload and returns a list containing receipt metadata.
+
+```{r}
+config <- hadeda_config(network = "testnet")
+config$grpc$submit_message <- function(config, topic_id, payload, memo, chunk_info, wait_for_receipt) {
+  stop("Replace with a gRPC client that returns Hedera receipt metadata")
+}
+
+ack <- consensus_submit_message(
+  config,
+  topic_id = "0.0.1234",
+  message = "Hello, Hedera!",
+  memo = "hadeda vignette"
+)
+```
+
+Large payloads are automatically chunked according to Hedera limits. The return
+value records one row per chunk with the transaction identifier, pre-check
+status, receipt status, consensus timestamp, and the raw handler response.
+
+## Streaming new messages
+
+While this release focuses on batch retrieval, the helper architecture already
+normalises message payloads. Future versions will include
+`topics_messages_stream()` for continuous updates using the mirror node WebSocket
+API. Until then you can poll `topics_messages()` with a `timestamp` filter to
+retrieve only new entries.

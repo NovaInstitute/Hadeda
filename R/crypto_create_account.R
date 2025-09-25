@@ -64,14 +64,14 @@ crypto_create_account <- function(config,
     )
 
     tibble::tibble(
-      account_id = rest_tbl$account,
       transaction_id = rep(NA_character_, nrow(rest_tbl)),
       status = rep(NA_character_, nrow(rest_tbl)),
       receipt_status = rep(NA_character_, nrow(rest_tbl)),
       consensus_timestamp = rep(lubridate::as_datetime(NA_real_), nrow(rest_tbl)),
       receipt = vector("list", nrow(rest_tbl)),
-      metadata = metadata,
-      response = rest_tbl$response
+      response = rest_tbl$response,
+      account_id = rest_tbl$account,
+      metadata = metadata
     )
   } else {
     response <- hadeda_grpc_crypto_create_account(

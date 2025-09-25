@@ -1,0 +1,100 @@
+---
+title: "Managing tokens with Hadeda"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Managing tokens with Hadeda}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+Hedera tokens cover fungible assets, NFTs, and treasury relationships. Hadeda
+provides helpers for metadata queries as well as gRPC-powered creation,
+association, and transfer flows.
+
+## Inspect token metadata
+
+`tokens_get()` queries mirror node metadata for a specific token. The helper
+returns a tibble with properties such as symbol, treasury account, expiry, and
+custom fee schedules.
+
+```{r}
+config <- hadeda_config(network = "testnet", default_transport = "rest")
+
+info <- tokens_get(config, token_id = "0.0.4001")
+info |> tidyr::unnest_wider(custom_fees)
+```
+
+To list holders and balances you can call `tokens_balances()` which normalises
+account IDs and quantities into tidy columns suitable for analysis.
+
+```{r}
+balances <- tokens_balances(
+  config,
+  token_id = "0.0.4001",
+  limit = 50
+)
+
+balances
+```
+
+## Create and associate tokens
+
+For lifecycle operations configure gRPC handlers inside `config$grpc`. Hadeda
+normalises arguments into the structures expected by Hedera protobuf builders.
+
+```{r}
+config <- hadeda_config(network = "testnet")
+config$grpc$token_create <- function(...) {
+  stop("Provide a TokenService::createToken implementation")
+}
+config$grpc$token_associate <- function(...) {
+  stop("Provide a TokenService::associateTokens implementation")
+}
+
+created <- tokens_create(
+  config,
+  name = "Example Token",
+  symbol = "EXM",
+  treasury_account_id = "0.0.7001",
+  initial_supply = 1e6,
+  token_type = "fungible_common"
+)
+
+association <- tokens_associate(
+  config,
+  account_id = "0.0.8002",
+  token_ids = c("0.0.4001", "0.0.5003"),
+  .transport = "grpc"
+)
+```
+
+Both helpers return acknowledgement tibbles with the transaction ID, consensus
+timestamp, receipt status, and the original response payload. `tokens_transfer()`
+follows the same pattern for movement of fungible or NFT units between accounts.
+
+## Analyse allowance and treasury data
+
+The allowance helpers expose token-level approvals granted to other accounts.
+Because the responses are tidy you can aggregate approvals for compliance
+reporting:
+
+```{r}
+approvals <- accounts_allowances_tokens(
+  config,
+  account_id = "0.0.7001"
+)
+
+approvals |> dplyr::count(spender, wt = amount)
+```
+
+Mirror node endpoints also include treasury relationships and NFT ownership
+records. Combine them with token metadata to build dashboards showing supply
+distribution, KYC status, and freeze states across your ecosystem.

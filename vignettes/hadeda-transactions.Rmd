@@ -1,0 +1,97 @@
+---
+title: "Analysing Hedera transactions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Analysing Hedera transactions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+Transactions are the backbone of Hedera network activity. Hadeda exposes
+wrappers for both REST queries and gRPC submissions so you can analyse history
+and inspect the results of state-changing operations.
+
+## Query transaction history
+
+`transactions_list()` surfaces paginated transaction records from the mirror
+node. Filters include transaction ID, account, timestamp bounds, and result
+status codes.
+
+```{r}
+config <- hadeda_config(network = "testnet", default_transport = "rest")
+
+transfers <- transactions_list(
+  config,
+  account_id = "0.0.1001",
+  transaction_type = "CRYPTOTRANSFER",
+  order = "desc",
+  limit = 10
+)
+
+transfers |> dplyr::select(consensus_timestamp, name, result, charged_tx_fee)
+```
+
+Use `transactions_get()` to retrieve detailed records for a specific transaction,
+including child transactions and associated contract call results:
+
+```{r}
+detail <- transactions_get(
+  config,
+  transaction_id = transfers$transaction_id[[1]],
+  limit = 20
+)
+
+detail |> tidyr::unnest(records)
+```
+
+## Submit new transfers
+
+For live transfers you will configure gRPC handlers to sign and submit
+transactions. Hadeda normalises hbar and token transfer definitions into a list
+structure that mirrors the protobuf schema.
+
+```{r}
+config <- hadeda_config(network = "testnet")
+config$grpc$transfer <- function(config, transfers, token_transfers, memo, transaction_valid_duration, max_fee, wait_for_receipt) {
+  stop("Provide a CryptoService transfer handler")
+}
+
+xfer <- crypto_transfer(
+  config,
+  transfers = tibble::tibble(
+    account_id = c("0.0.1001", "0.0.2002"),
+    amount = c(-1000L, 1000L)
+  ),
+  memo = "Example transfer"
+)
+```
+
+The helper returns a tibble with the transaction identifier, pre-check status,
+receipt status, consensus timestamp, and list-columns containing the original
+transfer definitions plus the raw gRPC response.
+
+## Reconcile transfers with account balances
+
+Because Hadeda returns tidy tibbles, you can join transaction data with account
+or token balances. For example, compute the running net movement for an account:
+
+```{r}
+net <- transfers |>
+  dplyr::mutate(amount = purrr::map_dbl(transfers, ~sum(purrr::map_dbl(.x$transfers, "amount")))) |>
+  dplyr::arrange(consensus_timestamp)
+
+net
+```
+
+In practice you will likely pivot the nested transfer list into a long format
+using `tidyr::unnest()` to build dashboards or export CSV summaries for finance
+teams. The consistent schema across REST and gRPC workflows keeps these
+pipelines straightforward.
