@@ -28,10 +28,10 @@ hadeda_parse_accounts <- function(records) {
   }
 
   tibble::tibble(
-    account = purrr::map_chr(records, "account", .default = NA_character_),
-    balance = purrr::map_dbl(records, c("balance", "balance"), .default = NA_real_),
-    timestamp = hadeda_parse_timestamp(purrr::map_chr(records, c("balance", "timestamp"), .default = NA_character_)),
-    deleted = purrr::map_lgl(records, "deleted", .default = NA),
-    public_key = purrr::map_chr(records, c("key", "key"), .default = NA_character_)
+    account = purrr::map_chr(records, ~purrr::pluck(.x, "account", .default = NA_character_)),
+    balance = purrr::map_dbl(records, ~purrr::pluck(.x, "balance", "balance", .default = NA_real_)),
+    timestamp = hadeda_parse_timestamp(purrr::map_chr(records, ~purrr::pluck(.x, "balance", "timestamp", .default = NA_character_))),
+    deleted = purrr::map_lgl(records, ~purrr::pluck(.x, "deleted", .default = NA)),
+    public_key = purrr::map_chr(records, ~purrr::pluck(.x, "key", "key", .default = NA_character_))
   )
 }

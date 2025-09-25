@@ -25,12 +25,22 @@ hadeda_parse_network_stake <- function(records) {
   }
 
   start_ts <- purrr::map_chr(records, function(record) {
-    record$staking_period_start %||% record$stakingPeriodStart %||% NA_character_
-  }, .default = NA_character_)
+    value <- record$staking_period_start %||% record$stakingPeriodStart
+    if (is.null(value)) {
+      NA_character_
+    } else {
+      as.character(value)
+    }
+  })
 
   end_ts <- purrr::map_chr(records, function(record) {
-    record$staking_period_end %||% record$stakingPeriodEnd %||% NA_character_
-  }, .default = NA_character_)
+    value <- record$staking_period_end %||% record$stakingPeriodEnd
+    if (is.null(value)) {
+      NA_character_
+    } else {
+      as.character(value)
+    }
+  })
 
   tibble::tibble(
     epoch_day = purrr::map_int(records, function(record) {

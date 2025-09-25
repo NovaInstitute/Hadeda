@@ -29,10 +29,10 @@ hadeda_parse_contracts <- function(records) {
   }
 
   tibble::tibble(
-    contract_id = purrr::map_chr(records, "contract_id", .default = NA_character_),
-    admin_key = purrr::map_chr(records, "admin_key", .default = NA_character_),
-    auto_renew_account_id = purrr::map_chr(records, "auto_renew_account_id", .default = NA_character_),
-    created_timestamp = hadeda_parse_timestamp(purrr::map_chr(records, "created_timestamp", .default = NA_character_)),
-    memo = purrr::map_chr(records, "memo", .default = NA_character_)
+    contract_id = purrr::map_chr(records, ~purrr::pluck(.x, "contract_id", .default = NA_character_)),
+    admin_key = purrr::map_chr(records, ~purrr::pluck(.x, "admin_key", .default = NA_character_)),
+    auto_renew_account_id = purrr::map_chr(records, ~purrr::pluck(.x, "auto_renew_account_id", .default = NA_character_)),
+    created_timestamp = hadeda_parse_timestamp(purrr::map_chr(records, ~purrr::pluck(.x, "created_timestamp", .default = NA_character_))),
+    memo = purrr::map_chr(records, ~purrr::pluck(.x, "memo", .default = NA_character_))
   )
 }

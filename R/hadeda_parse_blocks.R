@@ -37,23 +37,29 @@ hadeda_parse_blocks <- function(records) {
   start_ts <- purrr::map_chr(
     records,
     function(record) {
-      record$start_consensus_timestamp %||%
+      value <- record$start_consensus_timestamp %||%
         record$start_timestamp %||%
-        record$from %||%
+        record$from
+      if (is.null(value)) {
         NA_character_
-    },
-    .default = NA_character_
+      } else {
+        as.character(value)
+      }
+    }
   )
 
   end_ts <- purrr::map_chr(
     records,
     function(record) {
-      record$end_consensus_timestamp %||%
+      value <- record$end_consensus_timestamp %||%
         record$end_timestamp %||%
-        record$to %||%
+        record$to
+      if (is.null(value)) {
         NA_character_
-    },
-    .default = NA_character_
+      } else {
+        as.character(value)
+      }
+    }
   )
 
   tibble::tibble(
