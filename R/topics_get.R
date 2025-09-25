@@ -22,6 +22,21 @@ topics_get <- function(config,
   }
 
   resp <- hadeda_rest_get(config, paste0("topics/", topic_id))
-  record <- resp$topic %||% resp
+  record <- resp[["topic"]] %||% resp
+
+  if (is.null(record) || length(record) == 0) {
+    return(hadeda_parse_topics(list()))
+  }
+
+  while (
+    is.list(record) &&
+      length(record) == 1 &&
+      is.list(record[[1]]) &&
+      !rlang::has_name(record, "topic_id") &&
+      !rlang::has_name(record, "topicId")
+  ) {
+    record <- record[[1]]
+  }
+
   hadeda_parse_topics(list(record))
 }
