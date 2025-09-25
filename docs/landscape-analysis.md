@@ -115,12 +115,12 @@ Hadeda will also surface the Mirror Consensus Service streaming subscription via
 
 | RPC | Description | Hadeda function | Status |
 | --- | --- | --- | --- |
-| `createFile` | Create a new file | `file_create()` | 🚧 Planned |
-| `updateFile` | Update file contents or keys | `file_update()` | 🚧 Planned |
-| `deleteFile` | Delete a file | `file_delete()` | 🚧 Planned |
-| `appendContent` | Append contents to a file | `file_append()` | 🚧 Planned |
-| `getFileContent` | Download file contents | `file_content()` | 🚧 Planned |
-| `getFileInfo` | Retrieve file metadata | `file_info()` | 🚧 Planned |
+| `createFile` | Create a new file | `file_create()` | ✅ Implemented |
+| `updateFile` | Update file contents or keys | `file_update()` | ✅ Implemented |
+| `deleteFile` | Delete a file | `file_delete()` | ✅ Implemented |
+| `appendContent` | Append contents to a file | `file_append()` | ✅ Implemented |
+| `getFileContent` | Download file contents | `file_content()` | ✅ Implemented |
+| `getFileInfo` | Retrieve file metadata | `file_info()` | ✅ Implemented |
 
 ### Smart Contract Service (`SmartContractService`)
 
