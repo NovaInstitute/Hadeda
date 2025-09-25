@@ -1,0 +1,102 @@
+---
+title: "Deploying and calling smart contracts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Deploying and calling smart contracts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+Hadeda includes helpers for deploying contracts, calling functions, and
+retrieving metadata. This vignette outlines the workflow for preparing bytecode,
+submitting transactions, and inspecting execution results.
+
+## Retrieve contract metadata
+
+Mirror node endpoints expose contract bytecode, state, and execution results.
+`contracts_get()` fetches static metadata while `contracts_bytecode()` returns the
+raw bytecode as a hexadecimal string.
+
+```{r}
+config <- hadeda_config(network = "testnet", default_transport = "rest")
+
+metadata <- contracts_get(config, contract_id = "0.0.6001")
+metadata
+
+bytecode <- contracts_bytecode(config, contract_id = "0.0.6001")
+substring(bytecode$bytecode[[1]], 1, 16)
+```
+
+## Deploy a new contract
+
+Deployments require gRPC support plus a signing routine. Provide either raw
+bytecode or a file ID referencing bytecode uploaded via the File Service.
+
+```{r}
+config <- hadeda_config(network = "testnet")
+config$grpc$contract_deploy <- function(...) {
+  stop("Implement SmartContractService::createContract for your environment")
+}
+
+deployed <- contract_deploy(
+  config,
+  bytecode = "6080604052348015600f57600080fd5b...",
+  gas = 2e6,
+  memo = "Example deployment",
+  wait_for_record = TRUE
+)
+
+deployed |> tidyr::unnest_wider(receipt)
+```
+
+The tibble includes the contract identifier, bytecode hash, gas usage, and the
+raw response from the gRPC handler.
+
+## Call contract functions
+
+`contract_call()` automates ABI encoding when you supply a canonical function
+signature. Alternatively, provide pre-encoded call data.
+
+```{r}
+config$grpc$contract_call <- function(...) {
+  stop("Implement SmartContractService::contractCallMethod")
+}
+
+result <- contract_call(
+  config,
+  contract_id = deployed$contract_id[[1]],
+  function_signature = "balanceOf(address)",
+  parameters = list("0x0000000000000000000000000000000000000000"),
+  gas = 1e6,
+  wait_for_record = TRUE
+)
+
+result$return_data
+```
+
+The helper returns acknowledgement metadata plus the decoded call result and
+consumed gas. Use `contract_encode_parameters()` directly when constructing more
+complex call payloads or when you need to reuse selectors across multiple calls.
+
+## Automate post-deployment checks
+
+Because Hadeda returns tidy structures, you can combine deployment and call
+results with contract metadata to verify invariants. For example, confirm that
+an ERC-20 constructor minted the expected initial supply and assigned it to the
+treasury account:
+
+```{r}
+info <- tokens_get(config, token_id = "0.0.4001")
+stopifnot(info$total_supply[[1]] == 1e6)
+```
+
+Future releases will add helpers for log decoding and state proof verification to
+round out the contract lifecycle experience.

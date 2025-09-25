@@ -209,7 +209,21 @@ new_transfer <- crypto_transfer(
 * `R/` – Endpoint wrappers and internal helpers.
 * `man/` – Roxygen2-generated documentation referencing Hedera specs.
 * `tests/` – Testthat suites mocking REST and gRPC requests.
-* `inst/vignettes/` – Usage guides and walkthroughs for common workflows.
+* `vignettes/` – Usage guides and walkthroughs for common workflows.
+* `pkgdown/` – Site configuration for publishing reference documentation.
+
+## Documentation
+
+Rendered reference documentation and user journey vignettes are published via
+pkgdown. Build the site locally with:
+
+```r
+devtools::document()
+pkgdown::build_site()
+```
+
+The article index covers getting started, topics, transactions, tokens, and
+contracts so teams can follow end-to-end workflows across transports.
 
 ## Token service RPC helpers
 

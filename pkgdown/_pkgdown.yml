@@ -1,0 +1,71 @@
+template:
+  bootstrap: 5
+  bootswatch: cosmo
+
+home:
+  title: "Hadeda"
+  description: "Tidyverse wrappers for Hedera REST and gRPC services"
+
+navbar:
+  structure:
+    left: [reference, articles]
+    right: [github]
+  components:
+    github:
+      icon: fab fa-github
+      href: https://github.com/hadeda-r/hadeda
+
+articles:
+  - title: "User journeys"
+    contents:
+      - hadeda-getting-started
+      - hadeda-topics
+      - hadeda-transactions
+      - hadeda-tokens
+      - hadeda-contracts
+  - title: "Architecture"
+    contents:
+      - ../docs/landscape-analysis
+      - ../docs/function-architecture
+
+reference:
+  - title: "Configuration"
+    contents:
+      - hadeda_config
+      - hadeda_resolve_transport
+  - title: "Accounts"
+    contents:
+      - accounts_list
+      - accounts_get
+      - accounts_balance
+      - accounts_create
+      - accounts_allowances_crypto
+      - accounts_allowances_tokens
+      - accounts_allowances_nfts
+  - title: "Transactions and topics"
+    contents:
+      - transactions_list
+      - transactions_get
+      - consensus_submit_message
+      - topics_get
+      - topics_messages
+      - topics_message_submit
+  - title: "Tokens"
+    contents:
+      - tokens_get
+      - tokens_balances
+      - tokens_nfts
+      - tokens_create
+      - tokens_transfer
+      - tokens_associate
+  - title: "Contracts"
+    contents:
+      - contracts_get
+      - contracts_bytecode
+      - contract_call
+      - contract_deploy
+  - title: "Crypto"
+    contents:
+      - crypto_create_account
+      - crypto_transfer
+      - crypto_update_account_keys

@@ -1,0 +1,119 @@
+---
+title: "Getting started with Hadeda"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with Hadeda}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+Hadeda provides tidyverse-friendly wrappers around the Hedera REST and gRPC
+APIs. This vignette demonstrates how to initialise your environment, configure
+transport credentials, and create your first account on the Hedera testnet.
+
+## Install and load Hadeda
+
+The package uses `renv` to manage dependencies for contributors. End users can
+install Hadeda directly from the Git repository until a CRAN release becomes
+available:
+
+```{r}
+# install.packages("pak")
+pak::pak("hadeda-r/hadeda")
+
+library(hadeda)
+```
+
+The helper functions return tibbles and respect tidyverse semantics, so we will
+also load `dplyr` in examples:
+
+```{r}
+library(dplyr)
+```
+
+## Configure transports
+
+The Hedera mirror node REST API and gRPC services both require host
+configuration. Hadeda ships sensible defaults for the public testnet, but you
+can override them to target providers such as Hashio or private nodes. REST-only
+workflows require a base URL and optional headers:
+
+```{r}
+mirror <- hadeda_config(
+  network = "testnet",
+  rest = list(
+    base_url = "https://testnet.hashio.io/api/v1",
+    headers = list(`X-API-Key` = Sys.getenv("HASHIO_API_KEY"))
+  ),
+  default_transport = "rest"
+)
+```
+
+For gRPC interactions you will typically provide a channel constructor and
+transaction signing handler in `config$grpc`. The package does not prescribe a
+single signing strategy; instead, it works with closures that return signed
+transactions.
+
+```{r}
+grpc_handler <- list(
+  operator_account_id = Sys.getenv("HADEDA_OPERATOR_ID"),
+  channel = function() {
+    stop("Configure a gRPC channel factory for your environment")
+  },
+  sign_transaction = function(tx_bytes) {
+    stop("Provide a signing routine that returns raw signature bytes")
+  }
+)
+
+default <- hadeda_config(network = "testnet")
+default$grpc <- modifyList(default$grpc, grpc_handler)
+```
+
+See the `?hadeda_config` documentation for more detail on the configuration
+structure and expected handler interfaces.
+
+## Create an account
+
+With transports configured, you can create an account using the Hashio REST
+fallback or the CryptoService gRPC helper. REST providers such as Hashio manage
+key generation for you:
+
+```{r}
+new_account <- accounts_create(
+  mirror,
+  initial_balance = 10,
+  memo = "Hadeda demo"
+)
+
+new_account
+```
+
+When you control signing keys you can submit the same request over gRPC. The
+helper returns acknowledgement metadata including the new account ID and the
+full gRPC response payload for inspection.
+
+```{r}
+created <- crypto_create_account(
+  default,
+  public_key = Sys.getenv("HADEDA_PUBLIC_KEY"),
+  initial_balance = 10,
+  wait_for_record = TRUE
+)
+
+created |> tidyr::unnest_wider(receipt)
+```
+
+## Next steps
+
+With a funded account you can explore other Hadeda vignettes covering topic
+messaging, transaction queries, token management, and smart contract
+interaction. Each vignette builds on the configuration patterns introduced here
+so you can adapt them to mainnet or private deployments.
