@@ -18,7 +18,7 @@ test_that("transactions_list honours filters and parses payload", {
           charged_tx_fee = 234
         )
       ),
-      links = list(next = NULL)
+      links = list("next" = NULL)
     )
   )
 
@@ -82,7 +82,7 @@ test_that("topics_messages returns parsed tibble", {
           sequence_number = 1
         )
       ),
-      links = list(next = "topics/0.0.2000/messages?sequencenumber=gt:1")
+      links = list("next" = "topics/0.0.2000/messages?sequencenumber=gt:1")
     ),
     list(
       messages = list(
@@ -94,7 +94,7 @@ test_that("topics_messages returns parsed tibble", {
           sequence_number = 2
         )
       ),
-      links = list(next = NULL)
+      links = list("next" = NULL)
     )
   )
 
