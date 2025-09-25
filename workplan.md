@@ -5,11 +5,11 @@
 1. ✅ **Landscape analysis**
    * Review Hedera SDKs (Go, Java, JavaScript) and protobuf definitions to catalog available operations.
    * Confirm REST endpoint behavior via Mirror Node API documentation and sample responses.
-2. **Package scaffolding**
+2. ✅ **Package scaffolding**
    * Initialize R package structure with `usethis::create_package()`.
    * Configure `renv`, `devtools`, `testthat`, and CI workflows.
    * Provide pure configuration helpers that derive REST and gRPC settings plus a default transport field.
-3. **Utility layer**
+3. ✅ **Utility layer**
    * Implement HTTP client helpers using `httr2` for REST and `grpc`/`RProtoBuf` for RPC calls.
    * Create shared validators, pagination helpers, and response normalizers that output tibbles.
    * Add a transport router that inspects `.transport` overrides and configuration defaults to choose REST vs gRPC while preserving shared argument names.
@@ -35,9 +35,9 @@
    * Implement `consensus_submit_message()` with message chunking and acknowledgement handling.
 8. ✅ **Crypto service**
    * Implement account creation, key management, and transfer helpers, leveraging protobuf builders and REST fallbacks where mirror endpoints exist.
-9. **Token service**
+9. ✅ **Token service**
    * Implement token creation, association, and transfer RPC helpers with explicit fee controls and REST fallbacks when possible.
-10. **Smart contract service**
+10. ✅ **Smart contract service**
     * Provide `contract_call()` and deployment utilities, including contract parameter encoding.
 
 ## Phase 4 – Quality & documentation
