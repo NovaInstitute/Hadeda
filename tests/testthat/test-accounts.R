@@ -84,6 +84,54 @@ test_that("accounts_balance unwraps balances payload", {
   expect_s3_class(tbl$timestamp, "POSIXct")
 })
 
+test_that("balances_list paginates and flattens balance snapshots", {
+  cfg <- hadeda_config(network = "testnet")
+  page_one <- list(
+    timestamp = "1672531400.000000000",
+    balances = list(
+      list(account = "0.0.5005", balance = 1000, tokens = list()),
+      list(account = "0.0.6006", balance = 2500, tokens = list(list(token_id = "0.0.9009", balance = 10)))
+    ),
+    links = list(`next` = "balances?timestamp=lt:1672531390.000000000")
+  )
+  page_two <- list(
+    timestamp = "1672531390.000000000",
+    balances = list(
+      list(account = "0.0.7007", balance = 42, tokens = list())
+    ),
+    links = list(`next` = NULL)
+  )
+
+  with_mocked_bindings({
+    tbl <- balances_list(
+      cfg,
+      limit = 100,
+      account_id = "0.0.5005",
+      balance_min = 100,
+      balance_max = 5000,
+      public_key = "abcd",
+      timestamp = "lt:1672531500.000000000",
+      order = "asc"
+    )
+  }, hadeda_rest_paginate = function(config, path, query) {
+    expect_identical(path, "balances")
+    expect_equal(query$limit, 100)
+    expect_equal(query$`account.id`, "0.0.5005")
+    expect_equal(query$`account.balance.gt`, 100)
+    expect_equal(query$`account.balance.lt`, 5000)
+    expect_equal(query$publickey, "abcd")
+    expect_equal(query$timestamp, "lt:1672531500.000000000")
+    expect_equal(query$order, "asc")
+    list(page_one, page_two)
+  })
+
+  expect_equal(nrow(tbl), 3)
+  expect_true(all(tbl$account %in% c("0.0.5005", "0.0.6006", "0.0.7007")))
+  expect_equal(tbl$balance, c(1000, 2500, 42))
+  expect_s3_class(tbl$timestamp, "POSIXct")
+  expect_equal(tbl$tokens[[2]][[1]]$token_id, "0.0.9009")
+})
+
 test_that("accounts_allowances_crypto paginates and parses allowances", {
   cfg <- hadeda_config(network = "testnet")
   page <- list(
