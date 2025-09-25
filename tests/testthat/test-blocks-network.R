@@ -159,6 +159,91 @@ test_that("network_exchange_rate parses current and next rates", {
   expect_s3_class(tbl$expiration_timestamp, "POSIXct")
 })
 
+test_that("network_supply parses supply payload", {
+  cfg <- hadeda_config(network = "testnet")
+  response <- list(
+    timestamp = "1700000400.000000000",
+    released_supply = "5000000000000000",
+    total_supply = 5000000000000000,
+    circulating_supply = "4990000000000000",
+    max_supply = 5000000000000000
+  )
+
+  with_mocked_bindings({
+    tbl <- network_supply(cfg)
+  }, hadeda_rest_get = function(config, path, query = list()) {
+    expect_identical(path, "network/supply")
+    response
+  })
+
+  expect_equal(nrow(tbl), 1)
+  expect_s3_class(tbl$collected_timestamp, "POSIXct")
+  expect_equal(tbl$released_supply, 5000000000000000)
+  expect_equal(tbl$circulating_supply, 4990000000000000)
+})
+
+test_that("network_fees parses fee schedule payload", {
+  cfg <- hadeda_config(network = "testnet")
+  response <- list(
+    timestamp = "1700000500.000000000",
+    current_fee_schedule = list(
+      timestamp = list(
+        from = "1700000400.000000000",
+        to = "1700000500.000000000"
+      ),
+      expiry_time = "1700000560.000000000",
+      transaction_fee_schedule = list(
+        list(
+          hedera_functionality = "CryptoTransfer",
+          timestamp = list(
+            from = "1700000400.000000000",
+            to = "1700000500.000000000"
+          ),
+          fees = list(
+            list(
+              sub_type = "DEFAULT",
+              fee_data = list(
+                network_data = list(constant = 10, bpt = 2),
+                node_data = list(constant = 5),
+                service_data = list(constant = 20)
+              )
+            )
+          )
+        )
+      )
+    ),
+    next_fee_schedule = list(
+      timestamp = list(
+        from = "1700000500.000000000",
+        to = "1700000600.000000000"
+      ),
+      expiry_time = "1700000660.000000000",
+      transaction_fee_schedule = list()
+    )
+  )
+
+  with_mocked_bindings({
+    tbl <- network_fees(cfg)
+  }, hadeda_rest_get = function(config, path, query = list()) {
+    expect_identical(path, "network/fees")
+    response
+  })
+
+  expect_equal(nrow(tbl), 2)
+  expect_equal(sort(tbl$schedule_type), c("current", "next"))
+  expect_s3_class(tbl$period_start, "POSIXct")
+  expect_s3_class(tbl$expiry_time, "POSIXct")
+  current_index <- which(tbl$schedule_type == "current")
+  current_schedule <- tbl$transaction_fee_schedule[[current_index]]
+  expect_s3_class(current_schedule, "tbl_df")
+  expect_equal(current_schedule$hedera_functionality, "CryptoTransfer")
+  fee_entry <- current_schedule$fees[[1]]
+  expect_s3_class(fee_entry, "tbl_df")
+  component_tbl <- fee_entry$fee_data[[1]]
+  expect_s3_class(component_tbl, "tbl_df")
+  expect_equal(component_tbl$component, c("network", "node", "service"))
+})
+
 test_that("tokens_nfts parses NFT list", {
   cfg <- hadeda_config(network = "testnet")
   token_id <- "0.0.5000"
