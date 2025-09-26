@@ -58,8 +58,7 @@ mirror <- hadeda_config(
 ```
 
 For gRPC interactions you will typically provide a channel constructor and
-transaction signing handler in `config$grpc`. The package does not prescribe a
-single signing strategy; instead, it works with closures that return signed
+transaction signing handler in `config$grpc`. The package does not prescribe a single signing strategy; instead, it works with closures that return signed
 transactions.
 
 ```{r}
