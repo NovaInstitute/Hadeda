@@ -30,6 +30,8 @@ Imports:
 Suggests:
     bit64,
     devtools,
+    grpc,
+    openssl,
     httptest2,
     lintr,
     mockery,
