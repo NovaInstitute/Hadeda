@@ -64,12 +64,12 @@ hashio <- hadeda_config(
   default_transport = "rest"
 )
 \dontrun{
-account <- accounts_create(hashio)
+treasury_id <- "0.0.5005"
 token <- tokens_create(
   hashio,
   name = "Hadeda Example",
   symbol = "HADEDA",
-  treasury_account_id = account$account
+  treasury_account_id = treasury_id
 )
 token$token_id
 }

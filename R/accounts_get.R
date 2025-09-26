@@ -18,8 +18,7 @@
 #'   default_transport = "rest"
 #' )
 #' \dontrun{
-#'   new_account <- accounts_create(hashio)
-#'   accounts_get(mirror, new_account$account)
+#'   accounts_get(mirror, "0.0.1234")
 #' }
 #'
 #' @export

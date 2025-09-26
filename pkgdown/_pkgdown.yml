@@ -39,7 +39,6 @@ reference:
       - accounts_get
       - accounts_balance
       - balances_list
-      - accounts_create
       - accounts_allowances_crypto
       - accounts_allowances_tokens
       - accounts_allowances_nfts

@@ -101,8 +101,8 @@ construction behave deterministically.
 The Phase 3 buildout introduces initial CryptoService coverage alongside the
 Consensus submit helper delivered earlier. Newly implemented verbs include:
 
-- `crypto_create_account()` – chooses between a gRPC mutation and the existing
-  REST `accounts_create()` fallback, returning tidy acknowledgement metadata.
+- `crypto_create_account()` – submits a gRPC mutation via the configured
+  handler, returning tidy acknowledgement metadata.
 - `crypto_transfer()` – normalises hbar and token transfer payloads before
   delegating to the configured gRPC transport and parsing the resulting
   receipt.

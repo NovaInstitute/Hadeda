@@ -49,8 +49,7 @@ hashio <- hadeda_config(
   default_transport = "rest"
 )
 \dontrun{
-  new_account <- accounts_create(hashio)
-  accounts_list(mirror, account_id = new_account$account)
+  accounts_list(mirror, account_id = "0.0.1234")
 }
 
 }

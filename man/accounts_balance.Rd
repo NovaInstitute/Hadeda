@@ -32,10 +32,9 @@ hashio <- hadeda_config(
   default_transport = "rest"
 )
 \dontrun{
-  new_account <- accounts_create(hashio)
   accounts_balance(
     config = mirror,
-    account_id = new_account$account,
+    account_id = "0.0.1234",
     timestamp = "1700000000.000000000"
   )
 }

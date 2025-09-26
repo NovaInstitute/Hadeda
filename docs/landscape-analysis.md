@@ -7,7 +7,8 @@ serve as the source of truth for endpoint-to-function mappings.
 
 All planned Hadeda verbs share the signature conventions described in the README.
 Each entry below references the upstream capability and the corresponding
-Hadeda function we will implement.
+Hadeda function we will implement. Mirror node REST APIs remain read-only, so
+account creation flows exclusively through gRPC transports.
 
 ## Coverage snapshot
 

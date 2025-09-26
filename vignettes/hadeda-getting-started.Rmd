@@ -82,23 +82,10 @@ structure and expected handler interfaces.
 
 ## Create an account
 
-With transports configured, you can create an account using the Hashio REST
-fallback or the CryptoService gRPC helper. REST providers such as Hashio manage
-key generation for you:
-
-```{r}
-new_account <- accounts_create(
-  mirror,
-  initial_balance = 10,
-  memo = "Hadeda demo"
-)
-
-new_account
-```
-
-When you control signing keys you can submit the same request over gRPC. The
-helper returns acknowledgement metadata including the new account ID and the
-full gRPC response payload for inspection.
+Mirror node REST APIs are read-only, so account creation always flows through
+the CryptoService gRPC helper. Configure a handler that delegates to your
+preferred SDK client and then call `crypto_create_account()` with the desired
+metadata:
 
 ```{r}
 created <- crypto_create_account(

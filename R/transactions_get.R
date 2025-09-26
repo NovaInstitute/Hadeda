@@ -18,14 +18,7 @@
 #'   default_transport = "rest"
 #' )
 #' \dontrun{
-#'   new_account <- accounts_create(hashio)
-#'   new_token <- tokens_create(
-#'     hashio,
-#'     name = "Hadeda Example",
-#'     symbol = "HADEDA",
-#'     treasury_account_id = new_account$account
-#'   )
-#'   transactions_get(mirror, new_token$transaction_id)
+#'   transactions_get(mirror, "0.0.1234-1700000000-000000000")
 #' }
 #'
 #' @export

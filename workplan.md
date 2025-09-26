@@ -35,7 +35,7 @@
 7. ✅ **Consensus service**
    * Implement `consensus_submit_message()` with message chunking and acknowledgement handling.
 8. ✅ **Crypto service**
-   * Implement account creation, key management, and transfer helpers, leveraging protobuf builders and REST fallbacks where mirror endpoints exist.
+   * Implement account creation, key management, and transfer helpers, leveraging protobuf builders. Account creation relies solely on gRPC handlers because mirror endpoints remain read-only.
 9. ✅ **Token service**
    * Implement token creation, association, and transfer RPC helpers with explicit fee controls and REST fallbacks when possible.
 10. ✅ **Smart contract service**

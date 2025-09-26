@@ -26,6 +26,8 @@ wrap today, grouped by functional area:
   `accounts_balance()`, `accounts_allowances_crypto()`,
   `accounts_allowances_tokens()`, `accounts_allowances_nfts()`, rewards history, and `balances_list()`
   for timestamped snapshots.
+  Mirror node REST APIs are read-only for accounts, so creation and
+  lifecycle management flow exclusively through the gRPC helpers.
 * **Blocks and contracts** – block pagination plus full contract metadata,
   state, result listings, and per-transaction execution lookups.
 * **Network and governance** – exchange rates via `network_exchange_rate()`,
@@ -85,7 +87,7 @@ rest of the package.
   * A `.transport` argument defaults to `NULL`, enabling auto-selection between REST and gRPC while letting advanced users force a protocol.
   * Dots (`...`) are reserved for future extensions such as pagination cursors or request options.
 * **Argument types**
-  * Identifiers (`account_id`, `token_id`, `transaction_id`) are stored as character vectors in the Hedera format (for example the account returned by `accounts_create()` might be `"0.0.4891617"`).
+  * Identifiers (`account_id`, `token_id`, `transaction_id`) are stored as character vectors in the Hedera format (for example the account returned by `crypto_create_account()` might be `"0.0.4891617"`).
   * Monetary amounts (`amount`, `fee`, `max_fee`) use 64-bit integers via the `bit64::integer64` class to preserve precision.
   * Boolean toggles use bare logicals (`TRUE`/`FALSE`).
   * Timestamps and durations use `POSIXct` and `lubridate::duration` objects respectively.
@@ -168,42 +170,56 @@ accounts <- accounts_list(hadeda_config(network = "testnet")) %>%
   filter(balance_hbar > 100) %>%
   arrange(desc(balance_hbar))
 
-hashio <- hadeda_config(
+grpc_config <- hadeda_config(
   network = "testnet",
-  rest = list(
-    base_url = "https://testnet.hashio.io/api/v1",
-    headers = list(`X-API-Key` = Sys.getenv("HASHIO_API_KEY"))
+  grpc = list(
+    create_account = function(config,
+                               public_key,
+                               initial_balance,
+                               alias,
+                               key_type,
+                               memo,
+                               auto_renew_period,
+                               key_list,
+                               wait_for_record) {
+      list(
+        transaction_id = "0.0.5005-1700000000-000000000",
+        status = "OK",
+        receipt = list(status = "SUCCESS", accountId = "0.0.5005")
+      )
+    },
+    crypto_transfer = function(config,
+                               transfers,
+                               token_transfers,
+                               memo,
+                               transaction_valid_duration,
+                               max_fee,
+                               wait_for_receipt) {
+      list(
+        transaction_id = "0.0.5005-1700000001-000000001",
+        status = "OK",
+        receipt = list(status = "SUCCESS"),
+        consensusTimestamp = "1700000001.000000001"
+      )
+    }
   ),
-  default_transport = "rest"
+  default_transport = "grpc"
 )
-from_account <- accounts_create(hashio)
-to_account <- accounts_create(hashio)
-new_token <- tokens_create(
-  hashio,
-  name = "Hadeda Demo Token",
-  symbol = "HADEDA",
-  treasury_account_id = from_account$account
+
+new_account <- crypto_create_account(
+  grpc_config,
+  public_key = "302a300506032b6570032100...",
+  initial_balance = 10
 )
-tokens_associate(
-  hadeda_config(network = "testnet"),
-  account_id = to_account$account,
-  token_ids = new_token$token_id,
-  .transport = "grpc"
-)
-tokens_transfer(
-  hadeda_config(network = "testnet"),
-  token_transfers = tibble::tibble(
-    token_id = new_token$token_id,
-    account_id = c(from_account$account, to_account$account),
-    amount = c(-10, 10)
+
+crypto_transfer(
+  grpc_config,
+  transfers = tibble::tribble(
+    ~account_id, ~amount,
+    "0.0.5005", bit64::as.integer64(-1e8),
+    new_account$account_id, bit64::as.integer64(1e8)
   ),
-  .transport = "grpc"
-)
-new_transfer <- crypto_transfer(
-  hadeda_config(network = "testnet"),
-  from_account = from_account$account,
-  to_account = to_account$account,
-  amount = bit64::as.integer64(1e8)
+  memo = "Example transfer"
 )
 ```
 
