@@ -38,7 +38,9 @@ crypto_account_balance <- function(config,
 #' @keywords internal
 hadeda_grpc_crypto_account_balance <- function(config, account_id) {
   grpc <- hadeda_require_grpc(config)
-  handler <- grpc$get_account_balance %||% grpc$crypto_get_account_balance %||% grpc$account_balance
+  handler <- grpc$crypto_get_balance %||% grpc$cryptoGetBalance %||%
+    grpc$get_account_balance %||% grpc$getAccountBalance %||%
+    grpc$crypto_get_account_balance %||% grpc$account_balance
   if (!rlang::is_function(handler)) {
     cli::cli_abort(
       "No gRPC CryptoService balance handler configured.\nProvide `config$grpc$get_account_balance` to enable balance queries.",

@@ -499,20 +499,42 @@ test_that("crypto_transaction_record parses response", {
   cfg$default_transport <- "grpc"
 
   response <- list(
-    transactionId = "0.0.2-1-1",
-    consensusTimestamp = "1700000006.000000000",
-    memo = "memo"
+    transactionRecord = list(
+      transactionId = "0.0.2-1-1",
+      consensusTimestamp = "1700000006.000000000",
+      memo = "memo"
+    ),
+    duplicateTransactionRecords = list(
+      list(transactionId = "0.0.2-1-1-dup")
+    ),
+    child_transaction_records = list(
+      list(transactionId = "0.0.2-1-1-child")
+    )
   )
 
   with_mocked_bindings({
-    tbl <- crypto_transaction_record(cfg, transaction_id = "0.0.2-1-1")
-  }, hadeda_grpc_crypto_transaction_record = function(config, transaction_id) {
+    tbl <- crypto_transaction_record(
+      cfg,
+      transaction_id = "0.0.2-1-1",
+      include_duplicates = TRUE,
+      include_child_records = TRUE
+    )
+  }, hadeda_grpc_crypto_transaction_record = function(config,
+                                                       transaction_id,
+                                                       include_duplicates,
+                                                       include_child_records) {
     expect_equal(transaction_id, "0.0.2-1-1")
+    expect_true(include_duplicates)
+    expect_true(include_child_records)
     response
   })
 
   expect_equal(tbl$transaction_id, "0.0.2-1-1")
   expect_equal(tbl$memo, "memo")
+  expect_equal(nrow(tbl$duplicate_records[[1]]), 1)
+  expect_equal(tbl$duplicate_records[[1]]$transaction_id, "0.0.2-1-1-dup")
+  expect_equal(nrow(tbl$child_records[[1]]), 1)
+  expect_equal(tbl$child_records[[1]]$transaction_id, "0.0.2-1-1-child")
 })
 
 test_that("crypto_transaction_records parses response", {
@@ -520,21 +542,30 @@ test_that("crypto_transaction_records parses response", {
   cfg$default_transport <- "grpc"
 
   response <- list(
-    records = list(
-      list(transactionId = "0.0.2-1-2"),
-      list(transactionId = "0.0.2-1-3")
+    transactionRecord = list(transactionId = "0.0.2-1-2"),
+    duplicateTransactionRecords = list(
+      list(transactionId = "0.0.2-1-2-dup")
+    ),
+    childTransactionRecords = list(
+      list(transactionId = "0.0.2-1-2-child")
     )
   )
 
   with_mocked_bindings({
     tbl <- crypto_transaction_records(cfg, transaction_id = "0.0.2-1-2")
-  }, hadeda_grpc_crypto_transaction_records = function(config, transaction_id) {
+  }, hadeda_grpc_crypto_transaction_record = function(config,
+                                                       transaction_id,
+                                                       include_duplicates,
+                                                       include_child_records) {
     expect_equal(transaction_id, "0.0.2-1-2")
+    expect_true(include_duplicates)
+    expect_true(include_child_records)
     response
   })
 
   expect_equal(nrow(tbl), 2)
-  expect_equal(tbl$transaction_id[[2]], "0.0.2-1-3")
+  expect_setequal(tbl$record_type, c("duplicate", "child"))
+  expect_true(all(tbl$parent_transaction_id == "0.0.2-1-2"))
 })
 
 test_that("crypto_livehash stubs raise error", {

@@ -93,18 +93,23 @@ gRPC helpers land. Each RPC corresponds to a Hadeda verb that consumes a
 | `approveAllowances` | Approve fungible/NFT allowances | `crypto_approve_allowances()` | ✅ Implemented |
 | `deleteAllowances` | Revoke allowances | `crypto_delete_allowances()` | ✅ Implemented |
 | `getAccountRecords` | Query account transaction records | `crypto_account_records()` | ✅ Implemented |
-| `getAccountBalance` | Query account balance | `crypto_account_balance()` | ✅ Implemented |
+| `cryptoGetBalance` | Query account balance | `crypto_account_balance()` | ✅ Implemented |
 | `getAccountInfo` | Query account metadata | `crypto_account_info()` | ✅ Implemented |
 | `getTransactionReceipts` | Get receipts by transaction ID | `crypto_transaction_receipts()` | ✅ Implemented |
-| `getTransactionRecord` | Get a single transaction record | `crypto_transaction_record()` | ✅ Implemented |
-| `getTransactionRecords` | Get paged transaction records | `crypto_transaction_records()` | ✅ Implemented |
-| `getAccountDetails` | Rich account metadata (HIP-623) | `crypto_account_details()` | ✅ Implemented |
+| `getTxRecordByTxID` | Get the primary, duplicate, and child records for a transaction | `crypto_transaction_record()` / `crypto_transaction_records()` | ✅ Implemented |
 | Deprecated live hash RPCs | Exposed for completeness but throw `NOT_SUPPORTED` | `crypto_livehash_*()` (internal stubs) | ✅ Implemented |
+
+`getTransactionRecords` was removed from the 2024 protobuf refresh. Hadeda now
+surfaces duplicate and child records exclusively through the updated
+`getTxRecordByTxID` helper pair above.
 
 ### Consensus Service (`ConsensusService`)
 
 | RPC | Description | Hadeda function | Status |
 | --- | --- | --- | --- |
+| `createTopic` | Create a new consensus topic | `consensus_create_topic()` | 🚧 Planned |
+| `updateTopic` | Update consensus topic metadata | `consensus_update_topic()` | 🚧 Planned |
+| `deleteTopic` | Delete a consensus topic | `consensus_delete_topic()` | 🚧 Planned |
 | `submitMessage` | Submit a topic message | `consensus_submit_message()` | ✅ Implemented |
 | `submitMessageChunk` | Submit chunked message segments | `consensus_submit_message_chunk()` | ✅ Implemented |
 | `getTopicInfo` | Query topic metadata | `consensus_topic_info()` | ✅ Implemented |
@@ -133,8 +138,11 @@ Hadeda will also surface the Mirror Consensus Service streaming subscription via
 | `contractCallLocalMethod` | Local query (no state change) | `contract_call_local()` | ✅ Implemented |
 | `deleteContract` | Delete a contract | `contract_delete()` | ✅ Implemented |
 | `getContractInfo` | Query contract metadata | `contract_info()` | ✅ Implemented |
-| `getContractRecords` | Fetch contract transaction records | `contract_records()` | ✅ Implemented |
+| `getContractRecords` | Fetch contract transaction records | `contract_records()` | ⚠️ Deprecated in proto |
 | `getTxRecordByContractID` | Fetch records by contract ID | `contract_tx_record_by_id()` | ✅ Implemented |
+
+The Hedera team marks `getContractRecords` as obsolete. The Hadeda helper now
+documents the limitation and will be retired once the upstream RPC is removed.
 
 ### Token Service (`TokenService`)
 
@@ -154,12 +162,20 @@ Hadeda will also surface the Mirror Consensus Service streaming subscription via
 | `dissociateTokens` | Dissociate fungible tokens | `tokens_dissociate()` | 🚧 Planned |
 | `approveTokenAllowance` | Approve token allowance | `tokens_approve_allowance()` | 🚧 Planned |
 | `deleteTokenAllowance` | Revoke token allowance | `tokens_delete_allowance()` | 🚧 Planned |
+| `updateTokenFeeSchedule` | Update custom fee schedule | `tokens_update_fee_schedule()` | 🚧 Planned |
 | `getTokenInfo` | Query token metadata | `tokens_info()` | 🚧 Planned |
 | `getTokenNftInfo` | Query NFT metadata | `tokens_nft_info()` | 🚧 Planned |
 | `getTokenNftInfos` | List NFTs | `tokens_nft_infos()` | 🚧 Planned |
 | `getAccountNftInfos` | List NFTs owned by an account | `tokens_account_nft_infos()` | 🚧 Planned |
 | `getTokenNftTransferHistory` | NFT transfer history | `tokens_nft_transfer_history()` | 🚧 Planned |
 | `getTokenRelationships` | Query account-token relationships | `tokens_relationships()` | 🚧 Planned |
+| `pauseToken` | Pause token transfers | `tokens_pause()` | 🚧 Planned |
+| `unpauseToken` | Resume token transfers | `tokens_unpause()` | 🚧 Planned |
+| `updateNfts` | Update NFT metadata for multiple serials | `tokens_update_nfts()` | 🚧 Planned |
+| `rejectToken` | Reject one or more tokens | `tokens_reject()` | 🚧 Planned |
+| `airdropTokens` | Airdrop tokens to accounts | `tokens_airdrop()` | 🚧 Planned |
+| `cancelAirdrop` | Cancel pending airdrops | `tokens_cancel_airdrop()` | 🚧 Planned |
+| `claimAirdrop` | Claim pending airdrops | `tokens_claim_airdrop()` | 🚧 Planned |
 
 ### Schedule Service (`ScheduleService`)
 
@@ -177,10 +193,12 @@ Hadeda will also surface the Mirror Consensus Service streaming subscription via
 | `NetworkService` | `getVersionInfo` | `network_version_info()` |
 | `NetworkService` | `getExecutionTime` | `network_execution_time()` |
 | `NetworkService` | `getAccountDetails` (HIP-623) | `network_account_details()` |
+| `NetworkService` | `uncheckedSubmit` (deprecated) | — |
 | `FreezeService` | `freeze` | `freeze_network()` |
 | `FreezeService` | `freezeUpgrade` | `freeze_upgrade()` |
 | `FreezeService` | `freezeAbort` | `freeze_abort()` |
 | `UtilService` | `prng` | `util_prng()` |
+| `UtilService` | `atomicBatch` | `util_atomic_batch()` |
 
 ## SDK parity checklist
 

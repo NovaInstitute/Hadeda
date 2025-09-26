@@ -416,3 +416,65 @@ hadeda_parse_grpc_transaction_receipts <- function(response) {
     receipt = receipts
   )
 }
+
+#' @keywords internal
+hadeda_parse_grpc_transaction_record_response <- function(response) {
+  if (is.null(response)) {
+    response <- list()
+  }
+
+  record <- response$transaction_record %||% response$transactionRecord %||% list()
+  duplicates <- response$duplicate_transaction_records %||% response$duplicateTransactionRecords %||% list()
+  children <- response$child_transaction_records %||% response$childTransactionRecords %||% list()
+
+  main <- hadeda_parse_grpc_transaction_record(record)
+  main$duplicate_records <- list(hadeda_parse_grpc_transaction_records(list(records = duplicates)))
+  main$child_records <- list(hadeda_parse_grpc_transaction_records(list(records = children)))
+  main$response <- list(response)
+  main
+}
+
+#' @keywords internal
+hadeda_parse_grpc_transaction_record_sets <- function(response,
+                                                      include_duplicates = TRUE,
+                                                      include_child_records = TRUE) {
+  parsed <- hadeda_parse_grpc_transaction_record_response(response)
+
+  duplicates <- if (rlang::is_true(include_duplicates)) {
+    parsed$duplicate_records[[1]]
+  } else {
+    hadeda_parse_grpc_transaction_records(list(records = list()))
+  }
+  children <- if (rlang::is_true(include_child_records)) {
+    parsed$child_records[[1]]
+  } else {
+    hadeda_parse_grpc_transaction_records(list(records = list()))
+  }
+
+  if (nrow(duplicates) > 0) {
+    duplicates$record_type <- "duplicate"
+  }
+  if (nrow(children) > 0) {
+    children$record_type <- "child"
+  }
+
+  combined <- vctrs::vec_rbind(duplicates, children)
+
+  if (is.null(combined) || nrow(combined) == 0) {
+    return(tibble::tibble(
+      parent_transaction_id = character(),
+      record_type = character(),
+      transaction_id = character(),
+      consensus_timestamp = lubridate::as_datetime(numeric()),
+      memo = character(),
+      receipt = list(),
+      transfers = list(),
+      record = list(),
+      response = list()
+    ))
+  }
+
+  combined$parent_transaction_id <- parsed$transaction_id[[1]]
+  combined$response <- rep(list(parsed$response[[1]]), nrow(combined))
+  combined
+}

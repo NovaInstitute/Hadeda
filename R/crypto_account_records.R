@@ -37,7 +37,8 @@ crypto_account_records <- function(config,
 #' @keywords internal
 hadeda_grpc_crypto_account_records <- function(config, account_id) {
   grpc <- hadeda_require_grpc(config)
-  handler <- grpc$get_account_records %||% grpc$crypto_get_account_records %||% grpc$account_records
+  handler <- grpc$get_account_records %||% grpc$getAccountRecords %||%
+    grpc$crypto_get_account_records %||% grpc$account_records
   if (!rlang::is_function(handler)) {
     cli::cli_abort(
       "No gRPC CryptoService account records handler configured.\nProvide `config$grpc$get_account_records` to enable record queries.",

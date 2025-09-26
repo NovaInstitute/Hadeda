@@ -36,7 +36,8 @@ crypto_account_info <- function(config,
 #' @keywords internal
 hadeda_grpc_crypto_account_info <- function(config, account_id) {
   grpc <- hadeda_require_grpc(config)
-  handler <- grpc$get_account_info %||% grpc$crypto_get_account_info %||% grpc$account_info
+  handler <- grpc$get_account_info %||% grpc$getAccountInfo %||%
+    grpc$crypto_get_account_info %||% grpc$account_info
   if (!rlang::is_function(handler)) {
     cli::cli_abort(
       "No gRPC CryptoService account info handler configured.\nProvide `config$grpc$get_account_info` to enable info queries.",
@@ -87,7 +88,8 @@ crypto_account_details <- function(config,
 #' @keywords internal
 hadeda_grpc_crypto_account_details <- function(config, account_id) {
   grpc <- hadeda_require_grpc(config)
-  handler <- grpc$get_account_details %||% grpc$crypto_get_account_details
+  handler <- grpc$get_account_details %||% grpc$getAccountDetails %||%
+    grpc$crypto_get_account_details
   if (!rlang::is_function(handler)) {
     cli::cli_abort(
       "No gRPC CryptoService account details handler configured.\nProvide `config$grpc$get_account_details` to enable details queries.",

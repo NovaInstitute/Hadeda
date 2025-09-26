@@ -34,12 +34,21 @@
 
 7. ✅ **Consensus service**
    * Implement `consensus_submit_message()` with message chunking and acknowledgement handling.
+   * Add gRPC helpers for `createTopic`, `updateTopic`, and `deleteTopic` now
+     that the protobuf bundle documents their requirements.
 8. ✅ **Crypto service**
    * Implement account creation, key management, and transfer helpers, leveraging protobuf builders. Account creation relies solely on gRPC handlers because mirror endpoints remain read-only.
 9. ✅ **Token service**
    * Implement token creation, association, and transfer RPC helpers with explicit fee controls and REST fallbacks when possible.
+   * Track the 2024 protobuf additions (`updateTokenFeeSchedule`, pause/unpause,
+     NFT metadata updates, airdrop lifecycle) and schedule follow-up helpers to
+     reach parity.
 10. ✅ **Smart contract service**
     * Provide `contract_call()`, deployment utilities, and management/query helpers covering the SmartContractService RPC surface, including contract parameter encoding.
+    * Document that `getContractRecords` remains deprecated upstream and should
+      be replaced by more targeted queries when possible.
+    * Scope a UtilService `atomicBatch()` helper for orchestrating grouped
+      submissions alongside contract workflows.
 
 ## Phase 4 – Quality & documentation
 
