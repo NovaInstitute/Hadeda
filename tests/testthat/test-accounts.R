@@ -293,30 +293,3 @@ test_that("accounts_allowances_nfts flattens nested allowances", {
   expect_s3_class(tbl$timestamp, "POSIXct")
 })
 
-test_that("accounts_create posts payload and parses response", {
-  cfg <- hadeda_config(network = "testnet")
-  response <- list(
-    accountId = "0.0.6001",
-    evmAddress = "0xabc123",
-    publicKey = "302a300506032b6570032100abc",
-    privateKey = "302e020100300506032b657004220420def",
-    mnemonic = c("alpha", "beta", "gamma")
-  )
-
-  with_mocked_bindings({
-    tbl <- accounts_create(cfg, initial_balance = 10, memo = "demo")
-  }, hadeda_rest_post = function(config, path, body = list()) {
-    expect_identical(path, "accounts")
-    expect_equal(body$initialBalance, 10)
-    expect_equal(body$memo, "demo")
-    response
-  })
-
-  expect_s3_class(tbl, "tbl_df")
-  expect_equal(tbl$account, "0.0.6001")
-  expect_equal(tbl$evm_address, "0xabc123")
-  expect_equal(tbl$public_key, "302a300506032b6570032100abc")
-  expect_equal(tbl$private_key, "302e020100300506032b657004220420def")
-  expect_equal(tbl$mnemonic[[1]], c("alpha", "beta", "gamma"))
-  expect_equal(tbl$response, list(response))
-})

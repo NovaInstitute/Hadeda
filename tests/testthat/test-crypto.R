@@ -1,41 +1,3 @@
-test_that("crypto_create_account falls back to REST", {
-  cfg <- hadeda_config(network = "testnet")
-  cfg$default_transport <- "rest"
-
-  fake_response <- tibble::tibble(
-    account = "0.0.4001",
-    evm_address = "0xabc",
-    public_key = "302a300506032b6570032100",
-    private_key = NA_character_,
-    mnemonic = list(c("able", "baker", "charlie")),
-    response = list(list(accountId = "0.0.4001"))
-  )
-
-  with_mocked_bindings({
-    tbl <- crypto_create_account(
-      cfg,
-      initial_balance = 10,
-      memo = "rest-path"
-    )
-  }, accounts_create = function(config,
-                                 initial_balance,
-                                 alias,
-                                 key_type,
-                                 memo,
-                                 .transport) {
-    expect_identical(.transport, "rest")
-    expect_equal(initial_balance, 10)
-    expect_equal(memo, "rest-path")
-    fake_response
-  })
-
-  expect_s3_class(tbl, "tbl_df")
-  expect_equal(tbl$account_id, "0.0.4001")
-  expect_true(all(is.na(tbl$transaction_id)))
-  expect_equal(length(tbl$metadata), 1)
-  expect_equal(tbl$metadata[[1]]$evm_address, "0xabc")
-})
-
 test_that("crypto_create_account delegates to gRPC handler", {
   cfg <- hadeda_config(network = "testnet")
   cfg$default_transport <- "grpc"
@@ -86,6 +48,15 @@ test_that("crypto_create_account delegates to gRPC handler", {
   expect_equal(tbl$receipt_status, "SUCCESS")
   expect_s3_class(tbl$consensus_timestamp, "POSIXct")
   expect_equal(tbl$metadata[[1]]$key$`_type`, "ED25519")
+})
+
+test_that("crypto_create_account rejects unsupported transports", {
+  cfg <- hadeda_config(network = "testnet")
+  cfg$default_transport <- "rest"
+  expect_error(
+    crypto_create_account(cfg, public_key = "302a"),
+    "requires the gRPC transport"
+  )
 })
 
 test_that("crypto_transfer normalises transfer payloads", {

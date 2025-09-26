@@ -20,9 +20,9 @@ crypto_create_account(
 \arguments{
 \item{config}{A configuration list created by \code{\link[=hadeda_config]{hadeda_config()}}.}
 
-\item{public_key}{Optional public key to register for the account. When
-omitted and the REST transport is selected the mirror node will generate
-new keys on your behalf.}
+\item{public_key}{Public key to register for the account. Some gRPC handlers
+can derive a default from the operator configuration, but supplying a key
+explicitly is the most portable option.}
 
 \item{initial_balance}{Optional initial balance in tinybars.}
 
@@ -47,7 +47,44 @@ A tibble containing the new account identifier alongside transaction
 metadata.
 }
 \description{
-Submit a CryptoService account creation transaction using either the gRPC
-transport or, when explicitly requested, fall back to the REST
-\code{accounts_create()} helper for mirror node providers such as Hashio.
+Submit a CryptoService account creation transaction using the gRPC transport.
+Mirror node REST APIs are read-only for accounts, so this helper delegates to
+a user-supplied gRPC handler that signs and submits the transaction.
+}
+\examples{
+grpc_config <- hadeda_config(
+  network = "testnet",
+  grpc = list(
+    create_account = function(config,
+                               public_key,
+                               initial_balance,
+                               alias,
+                               key_type,
+                               memo,
+                               auto_renew_period,
+                               key_list,
+                               wait_for_record) {
+      # Delegate to an SDK client here. This stub illustrates the
+      # expected shape of the return value.
+      list(
+        transaction_id = "0.0.5005-1700000000-000000000",
+        status = "OK",
+        receipt = list(status = "SUCCESS", accountId = "0.0.5005"),
+        accountInfo = list(public_key = public_key)
+      )
+    }
+  ),
+  default_transport = "grpc"
+)
+
+\dontrun{
+  new_account <- crypto_create_account(
+    grpc_config,
+    public_key = "302a300506032b6570032100...",
+    initial_balance = 10,
+    memo = "Example account"
+  )
+  new_account$account_id
+}
+
 }

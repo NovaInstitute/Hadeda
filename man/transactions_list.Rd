@@ -46,18 +46,11 @@ hashio <- hadeda_config(
   default_transport = "rest"
 )
 \dontrun{
-  new_account <- accounts_create(hashio)
-  new_token <- tokens_create(
-    hashio,
-    name = "Hadeda Example",
-    symbol = "HADEDA",
-    treasury_account_id = new_account$account
-  )
   transactions_list(
     config = mirror,
     limit = 10,
-    account_id = new_account$account,
-    transaction_type = "TOKENCREATION"
+    account_id = "0.0.1234",
+    transaction_type = "CRYPTOCREATE"
   )
 }
 

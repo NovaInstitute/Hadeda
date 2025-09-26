@@ -30,14 +30,7 @@ hashio <- hadeda_config(
   default_transport = "rest"
 )
 \dontrun{
-  new_account <- accounts_create(hashio)
-  new_token <- tokens_create(
-    hashio,
-    name = "Hadeda Example",
-    symbol = "HADEDA",
-    treasury_account_id = new_account$account
-  )
-  tokens_get(mirror, new_token$token_id)
+  tokens_get(mirror, "0.0.6006")
 }
 
 }

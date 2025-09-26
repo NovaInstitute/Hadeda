@@ -20,18 +20,11 @@
 #'   default_transport = "rest"
 #' )
 #' \dontrun{
-#'   new_account <- accounts_create(hashio)
-#'   new_token <- tokens_create(
-#'     hashio,
-#'     name = "Hadeda Example",
-#'     symbol = "HADEDA",
-#'     treasury_account_id = new_account$account
-#'   )
 #'   tokens_balances(
 #'     config = mirror,
-#'     token_id = new_token$token_id,
+#'     token_id = "0.0.7007",
 #'     limit = 10,
-#'     account_id = new_account$account
+#'     account_id = "0.0.1234"
 #'   )
 #' }
 #'
