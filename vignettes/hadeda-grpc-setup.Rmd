@@ -1,0 +1,318 @@
+---
+title: "Configuring Hedera gRPC access"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Configuring Hedera gRPC access}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+Hadeda delegates all gRPC traffic to user-supplied handler functions that live
+in `config$grpc`. This vignette walks through a fully worked example that
+compiles Hedera protobuf definitions, establishes a channel, configures Ed25519
+signing, and wires everything into Hadeda so that functions such as
+`crypto_account_info()` can execute over gRPC.
+
+Because this vignette interacts with live Hedera endpoints you must provide a
+funded testnet account via the `HADEDA_OPERATOR_ID` and `HADEDA_OPERATOR_KEY`
+environment variables. When these variables are missing the helper functions
+introduced below will raise informative errors so you can follow the
+"Environment setup instructions to allow gRPC testing" guide shipped with the
+package.
+
+## Prerequisites
+
+```{r}
+# install.packages("pak")
+pak::pak(c("hadeda-r/hadeda", "openssl", "grpc"))
+
+library(hadeda)
+library(grpc)
+library(jsonlite)
+```
+
+You also need the Protocol Buffers compiler (`protoc`) and, for convenience,
+the `grpcurl` command line utility. Both tools are available via Homebrew,
+Chocolatey, or package managers for most Linux distributions.
+
+```sh
+# macOS using Homebrew
+brew install protobuf grpcurl
+
+# Ubuntu
+sudo apt-get install -y protobuf-compiler
+curl -L https://github.com/fullstorydev/grpcurl/releases/latest/download/grpcurl_`uname -s | tr '[:upper:]' '[:lower:]'`_x86_64.tar.gz \
+  | tar -xz -C /usr/local/bin grpcurl
+```
+
+## Download the Hedera protobuf definitions
+
+Hedera publishes versioned protobuf bundles on GitHub. The
+`hadeda_grpc_use_proto_bundle()` helper downloads a release archive, extracts it
+into a local directory, and returns the path you can pass to the compiler and
+`grpc` package.
+
+```{r}
+proto_root <- hadeda_grpc_use_proto_bundle(dest = "proto", version = "0.47.0")
+list.files(proto_root, recursive = FALSE)
+```
+
+The Hedera repository organises protobuf files under `services/`, `query.proto`,
+`transaction.proto`, and several shared message definitions. For the example we
+only need the CryptoService and basic response types.
+
+```{r}
+needed <- c(
+  "services/crypto_service.proto",
+  "services/network_service.proto",
+  "query.proto",
+  "transaction.proto",
+  "transaction_body.proto",
+  "transaction_record.proto",
+  "response.proto"
+)
+needed
+```
+
+## Generate a descriptor set with `protoc`
+
+The R `grpc` package expects a compiled descriptor set so that it can build
+clients dynamically. Invoke `protoc` with the downloaded bundle to produce a
+`hedera.pb` file containing all service and message definitions we need.
+
+```{r}
+descriptor <- file.path(proto_root, "hedera.pb")
+args <- c(
+  sprintf("--proto_path=%s", proto_root),
+  sprintf("--descriptor_set_out=%s", descriptor),
+  "--include_imports",
+  needed
+)
+system2("protoc", args = args, stdout = TRUE, stderr = TRUE)
+```
+
+Verify that the descriptor exists and record its absolute path for later use.
+
+```{r}
+file.exists(descriptor)
+```
+
+## Load services with the `grpc` package
+
+With the descriptor in place you can instruct `grpc` to create dynamic service
+clients. The code below creates reusable constructors for the CryptoService and
+NetworkService stubs. The `grpc::grpc_channel_create()` helper returns an
+HTTP/2 channel that we point at the public Hedera testnet.
+
+```{r}
+channel_factory <- function(target = "testnet.hedera.com:50211") {
+  grpc::grpc_channel_create(target, opts = list("grpc.ssl_target_name_override" = "testnet.hedera.com"))
+}
+
+descriptor_set <- grpc::grpc_read_descriptor(descriptor)
+crypto_service <- grpc::grpc_service(descriptor_set, "proto.CryptoService")
+network_service <- grpc::grpc_service(descriptor_set, "proto.NetworkService")
+```
+
+The service definitions expose RPC methods as R functions. For example
+`crypto_service$cryptoGetAccountInfo()` performs a unary call when supplied with
+properly encoded request bytes. The next section shows how to build those bytes
+from tidy R data frames using the descriptor metadata.
+
+## Build request payloads
+
+Descriptor objects include message factories that convert between R lists and
+protobuf binaries. A small helper wraps `grpc::grpc_message()` to create the
+`Query` and `Transaction` payloads required by Hedera.
+
+```{r}
+query_message <- function(name) {
+  grpc::grpc_message(descriptor_set, name)
+}
+
+to_account_id <- function(id) {
+  parts <- as.integer(strsplit(id, "\\.")[[1]])
+  list(shardNum = parts[1], realmNum = parts[2], accountNum = parts[3])
+}
+
+now_timestamp <- function() {
+  instant <- as.integer(as.numeric(Sys.time()))
+  list(seconds = instant, nanos = 0L)
+}
+
+crypto_get_account_info <- query_message("proto.CryptoGetInfoQuery")
+query_wrapper <- query_message("proto.Query")
+```
+
+Queries include a header that identifies the payer account and optionally the
+payment transaction. Hedera allows free queries up to a network-configured
+threshold; for this vignette we start by asking the network to price the query
+before submitting payment.
+
+```{r}
+operator <- hadeda_grpc_env_credentials()
+sign_transaction <- hadeda_grpc_ed25519_signer()
+operator$public_key <- hadeda_grpc_signer_public_key(sign_transaction)
+```
+
+The CryptoGetInfo query uses a two-step process:
+
+1. Submit a COST_ANSWER query with an empty payment to retrieve the fee.
+2. Assemble a second query that includes the payment transaction signed by the
+   operator key.
+
+The helper below simplifies those steps and returns a tidy list compatible with
+Hadeda's gRPC expectations.
+
+```{r}
+crypto_cost_query <- function(account_id, target = channel_factory()) {
+  cost_query <- query_wrapper$serialize(
+    list(
+      cryptogetinfo = list(
+        header = list(
+          responseType = "COST_ANSWER",
+          payment = list()
+        ),
+        accountID = to_account_id(account_id)
+      )
+    )
+  )
+
+  response_raw <- crypto_service$cryptoGetAccountInfo(target, cost_query)
+  crypto_service$cryptoGetAccountInfo$parse(response_raw)
+}
+```
+
+The network returns the required fee under `responseHeader.cost`. Use this value
+when building the signed payment transaction. The call to
+`hadeda_grpc_ed25519_signer()` earlier in the vignette already prepared a
+closure named `sign_transaction` that we reuse for the signed payment.
+
+Constructing the payment transaction requires the transaction body bytes and a
+signature map. The snippet below encodes the inner transaction using the
+`TransactionBody` message and signs it.
+
+```{r}
+transaction_body <- query_message("proto.TransactionBody")
+transaction <- query_message("proto.Transaction")
+
+build_payment <- function(operator, account_id, cost, valid_duration = 120L) {
+  pub_key <- hadeda_grpc_signer_public_key(sign_transaction)
+  body <- transaction_body$serialize(
+    list(
+      transactionID = list(
+        accountID = to_account_id(operator$operator_account_id),
+        transactionValidStart = now_timestamp()
+      ),
+      nodeAccountID = to_account_id("0.0.3"),
+      transactionFee = cost,
+      transactionValidDuration = list(seconds = as.integer(valid_duration)),
+      cryptoTransfer = list(
+        transfers = list(
+          accountAmounts = list(
+            list(accountID = to_account_id(operator$operator_account_id), amount = -cost),
+            list(accountID = to_account_id("0.0.3"), amount = cost)
+          )
+        )
+      )
+    )
+  )
+
+  sig_bytes <- sign_transaction(body)
+  signature_map <- list(
+    sigPair = list(
+      list(
+        pubKeyPrefix = pub_key,
+        ed25519 = sig_bytes
+      )
+    )
+  )
+
+  transaction$serialize(list(bodyBytes = body, sigMap = signature_map))
+}
+```
+
+With the payment prepared we can request account information over gRPC.
+
+```{r}
+query_account_info <- function(config, account_id) {
+  channel <- config$grpc$channel()
+  on.exit(grpc::grpc_channel_destroy(channel))
+
+  cost <- crypto_cost_query(account_id, channel)$responseHeader$cost
+  payment <- build_payment(config$grpc$operator, account_id, cost)
+
+  query_bytes <- query_wrapper$serialize(
+    list(
+      cryptogetinfo = list(
+        header = list(
+          responseType = "ANSWER_ONLY",
+          payment = list(signedTransactionBytes = payment)
+        ),
+        accountID = to_account_id(account_id)
+      )
+    )
+  )
+
+  response_raw <- crypto_service$cryptoGetAccountInfo(channel, query_bytes)
+  crypto_service$cryptoGetAccountInfo$parse(response_raw)
+}
+```
+
+## Register the handler with Hadeda
+
+Combine the pieces into a `config$grpc` list that Hadeda understands. We keep
+references to the operator credentials, the channel factory, and the signer.
+
+```{r}
+grpc_handler <- list(
+  operator_account_id = operator$operator_account_id,
+  operator = operator,
+  channel = channel_factory,
+  sign_transaction = sign_transaction,
+  get_account_info = function(config, account_id) {
+    query_account_info(config, account_id)
+  }
+)
+
+grpc_config <- hadeda_config(network = "testnet", default_transport = "grpc")
+grpc_config$grpc <- modifyList(grpc_config$grpc, grpc_handler)
+```
+
+Now calling `crypto_account_info()` uses the custom handler to perform a gRPC
+query end-to-end.
+
+```{r}
+info <- crypto_account_info(grpc_config, operator$operator_account_id)
+info
+```
+
+The returned tibble matches the schema from Hadeda's REST implementation but is
+sourced directly from Hedera consensus nodes through gRPC.
+
+## Troubleshooting
+
+- Ensure `HADEDA_OPERATOR_ID` and `HADEDA_OPERATOR_KEY` are exported in the shell
+  where you knit this vignette. The helpers stop early with actionable error
+  messages when they are missing.
+- gRPC requires HTTP/2 with TLS. When connecting to Hedera's testnet include the
+  `grpc.ssl_target_name_override` option shown above so the certificate matches
+  the service name.
+- If `protoc` cannot be found, verify that the executable is on your PATH.
+- When the network rejects a transaction because of invalid signatures, double
+  check that the Ed25519 key is correct and that your system clock is in sync.
+
+## Next steps
+
+Use the same pattern to implement handlers for other services such as
+`consensus_submit_message()` or token management RPCs. The descriptor set and
+message factories allow you to build and sign any Hedera transaction using tidy
+R tooling while keeping cryptographic material under your control.
