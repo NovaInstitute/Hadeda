@@ -48,17 +48,21 @@ JavaScript SDKs has a corresponding Hadeda verb:
 
 * **CryptoService** – account lifecycle management, hbar/token transfers, and
   allowance administration (`crypto_create_account()`, `crypto_transfer()`,
-  `crypto_delete_allowances()`, etc.).
-* **ConsensusService** – topic message submission (chunked and single) and
-  topic metadata queries.
+  `crypto_delete_allowances()`, `crypto_transaction_record()` for
+  `getTxRecordByTxID`, etc.).
+* **ConsensusService** – topic creation, updates, deletions, message
+  submission (chunked and single), and topic metadata queries.
 * **FileService** – file creation, updates, appends, deletes, and metadata
   queries.
 * **SmartContractService** – contract deployment, updates, on-ledger and local
-  calls, deletions, and record retrieval.
+  calls, deletions, and record retrieval (including the deprecated
+  `getContractTxRecordByID`).
 * **TokenService** – token lifecycle operations, treasury interactions,
-  association helpers, and NFT-specific queries.
+  association helpers, NFT-specific queries, and the newer airdrop/pause APIs
+  slated for future Hadeda helpers.
 * **ScheduleService** – schedule creation, signing, deletion, and info queries.
-* **Network/Util/Freeze services** – network metadata, PRNG utility, and freeze
+* **Network/Util/Freeze services** – network metadata, PRNG utility (with
+  planned support for the new `atomicBatch` transaction), and freeze
   orchestration endpoints required for node operators.
 
 Additional streaming helpers such as `topics_messages_stream()` and
@@ -67,13 +71,14 @@ workflows remain on par with JavaScript SDK capabilities.
 
 The initial gRPC surface now spans the full CryptoService (`crypto_create_account()`,
 `crypto_update_account()`, `crypto_update_account_keys()`, `crypto_transfer()`,
-`crypto_delete()`, allowance helpers, and the various account/transaction
-queries), alongside TokenService helpers (`tokens_create()`, `tokens_associate()`,
-`tokens_transfer()`), SmartContractService deployment and execution utilities
-(`contract_deploy()`, `contract_call()`), and the REST-backed
-`consensus_submit_message()`. These functions accept tidy inputs, delegate to
-user-provided gRPC handlers, and return acknowledgement tibbles that mirror the
-rest of the package.
+`crypto_delete()`, allowance helpers, and the updated
+`crypto_transaction_record()` / `crypto_transaction_records()` pair that now
+surface duplicate and child records), alongside TokenService helpers
+(`tokens_create()`, `tokens_associate()`, `tokens_transfer()`),
+SmartContractService deployment and execution utilities (`contract_deploy()`,
+`contract_call()`), and the REST-backed `consensus_submit_message()`. These
+functions accept tidy inputs, delegate to user-provided gRPC handlers, and
+return acknowledgement tibbles that mirror the rest of the package.
 
 ## Naming and argument conventions
 

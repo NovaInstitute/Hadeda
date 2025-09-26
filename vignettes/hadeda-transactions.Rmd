@@ -52,6 +52,22 @@ detail <- transactions_get(
 detail |> tidyr::unnest(records)
 ```
 
+When you need authoritative receipts straight from the node, switch to the gRPC
+helpers. `crypto_transaction_record()` now wraps the `getTxRecordByTxID` query
+and can request duplicate or child records in a single call:
+
+```{r}
+record <- crypto_transaction_record(
+  hadeda_config(network = "testnet"),
+  transaction_id = "0.0.5005-1700000000-000000000",
+  include_duplicates = TRUE,
+  include_child_records = TRUE
+)
+
+record$duplicate_records[[1]]
+record$child_records[[1]]
+```
+
 ## Submit new transfers
 
 For live transfers you will configure gRPC handlers to sign and submit
