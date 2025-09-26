@@ -65,33 +65,45 @@ proto_root <- hadeda_grpc_use_proto_bundle(dest = "proto", version = "0.47.0")
 list.files(proto_root, recursive = FALSE)
 ```
 
-The Hedera repository organises protobuf files under `services/`, `query.proto`,
-`transaction.proto`, and several shared message definitions. For the example we
-only need the CryptoService and basic response types.
+The Hedera repository organises protobuf files under the `services/` directory,
+which includes the service definitions alongside shared message types such as
+`query.proto` and `transaction.proto`. For the example we only need the
+CryptoService and basic response types.
 
 ```{r}
 needed <- c(
   "services/crypto_service.proto",
-  "services/network_service.proto",
-  "query.proto",
-  "transaction.proto",
-  "transaction_body.proto",
-  "transaction_record.proto",
-  "response.proto"
+  "services/network_service.proto"
 )
 needed
 ```
 
+With `--include_imports`, `protoc` automatically bundles every message type
+referenced by these services into the descriptor set.
+
 ## Generate a descriptor set with `protoc`
 
 The R `grpc` package expects a compiled descriptor set so that it can build
-clients dynamically. Invoke `protoc` with the downloaded bundle to produce a
+clients dynamically. The Hedera proto bundle keeps both service and shared
+message definitions under `services/`, so we include that directory in the
+compiler search paths. We also look for the standard Google protobuf includes
+next to the `protoc` binary so imports such as `google/protobuf/wrappers.proto`
+resolve automatically. Invoke `protoc` with the downloaded bundle to produce a
 `hedera.pb` file containing all service and message definitions we need.
 
 ```{r}
 descriptor <- file.path(proto_root, "hedera.pb")
+proto_paths <- c(proto_root, file.path(proto_root, "services"))
+protoc_bin <- Sys.which("protoc")
+protoc_include <- normalizePath(
+  file.path(dirname(protoc_bin), "..", "include"),
+  mustWork = FALSE
+)
+if (file.exists(file.path(protoc_include, "google/protobuf/wrappers.proto"))) {
+  proto_paths <- c(proto_paths, protoc_include)
+}
 args <- c(
-  sprintf("--proto_path=%s", proto_root),
+  sprintf("--proto_path=%s", proto_paths),
   sprintf("--descriptor_set_out=%s", descriptor),
   "--include_imports",
   needed
