@@ -32,7 +32,10 @@ package.
 
 ```{r}
 # install.packages("pak")
-pak::pak(c("hadeda-r/hadeda", "openssl", "grpc"))
+
+credentials::git_credential_ask()
+remotes::install_github("nfultz/grpc", auth_token = credentials::git_credential_ask()$password)
+pak::pak(c("hadeda-r/hadeda", "openssl"))
 
 library(hadeda)
 library(grpc)
