@@ -4,12 +4,24 @@
 \alias{crypto_transaction_record}
 \title{Retrieve a single transaction record}
 \usage{
-crypto_transaction_record(config, transaction_id, .transport = NULL)
+crypto_transaction_record(
+  config,
+  transaction_id,
+  include_duplicates = FALSE,
+  include_child_records = FALSE,
+  .transport = NULL
+)
 }
 \arguments{
 \item{config}{A configuration list from \code{\link[=hadeda_config]{hadeda_config()}}.}
 
 \item{transaction_id}{Transaction identifier string.}
+
+\item{include_duplicates}{Logical toggle requesting duplicate transaction
+records for the identifier.}
+
+\item{include_child_records}{Logical toggle requesting child transaction
+records spawned by the identifier.}
 
 \item{.transport}{Optional transport override.}
 }
@@ -17,6 +29,6 @@ crypto_transaction_record(config, transaction_id, .transport = NULL)
 A tibble with a single transaction record.
 }
 \description{
-Invoke \code{getTransactionRecord} to fetch the full transaction record for a
-transaction identifier.
+Invoke the CryptoService \code{getTxRecordByTxID} query to fetch the full
+transaction record for a transaction identifier.
 }

@@ -20,7 +20,7 @@ hadeda_network_defaults <- function(network) {
       ),
       grpc = list(
         host = "mainnet-public.grpc.hedera.com",
-        port = 50212,
+        port = 50212L,
         tls = TRUE
       )
     ),
@@ -31,7 +31,7 @@ hadeda_network_defaults <- function(network) {
       ),
       grpc = list(
         host = "testnet.grpc.hedera.com",
-        port = 50212,
+        port = 50212L,
         tls = TRUE
       )
     ),
@@ -42,7 +42,7 @@ hadeda_network_defaults <- function(network) {
       ),
       grpc = list(
         host = "previewnet.grpc.hedera.com",
-        port = 50212,
+        port = 50212L,
         tls = TRUE
       )
     ),
@@ -53,7 +53,7 @@ hadeda_network_defaults <- function(network) {
       ),
       grpc = list(
         host = "127.0.0.1",
-        port = 50211,
+        port = 50211L,
         tls = FALSE
       )
     ),
