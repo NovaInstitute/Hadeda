@@ -146,16 +146,27 @@ hadeda_grpc_use_proto_bundle <- function(dest = "proto", version = "0.47.0", ove
     version
   )
 
-  if (dir.exists(dest)) {
+  dest_path <- dest
+  if (!grepl("^(/|[A-Za-z]:|~|\\\\\\\\)", dest_path)) {
+    dest_path <- file.path(getwd(), dest_path)
+  }
+  dest_path <- path.expand(dest_path)
+
+  if (dir.exists(dest_path)) {
     if (!isTRUE(overwrite)) {
       cli::cli_abort(
         c(
-          "Destination already exists", "x" = dest,
+          "Destination already exists", "x" = dest_path,
           "i" = "Pass `overwrite = TRUE` to refresh the bundle."
         )
       )
     }
-    unlink(dest, recursive = TRUE)
+    unlink(dest_path, recursive = TRUE)
+  }
+
+  parent_dir <- dirname(dest_path)
+  if (!dir.exists(parent_dir)) {
+    dir.create(parent_dir, recursive = TRUE, showWarnings = FALSE)
   }
 
   temp_file <- tempfile(fileext = ".zip")
@@ -176,6 +187,19 @@ hadeda_grpc_use_proto_bundle <- function(dest = "proto", version = "0.47.0", ove
     cli::cli_abort("Unexpected archive contents while extracting protobuf bundle.")
   }
 
-  file.rename(extracted, dest)
-  invisible(normalizePath(dest))
+  moved <- file.rename(extracted, dest_path)
+  if (!isTRUE(moved)) {
+    dir.create(dest_path, recursive = TRUE, showWarnings = FALSE)
+    files <- list.files(extracted, all.files = TRUE, full.names = TRUE, no.. = TRUE)
+    copied <- vapply(
+      files,
+      function(path) file.copy(path, dest_path, recursive = TRUE, copy.mode = TRUE, copy.date = TRUE),
+      logical(1)
+    )
+    if (length(copied) && !all(copied)) {
+      cli::cli_abort("Failed to copy extracted protobuf files into the destination directory.")
+    }
+  }
+
+  invisible(normalizePath(dest_path))
 }
