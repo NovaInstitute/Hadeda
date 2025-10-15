@@ -29,29 +29,29 @@ exist on Windows via WSL, Chocolatey, or the official installers linked below.
 2. Export the account ID and private key in your shell profile so that they are
    available to R sessions:
 
-   ```sh
+```sh
    export HADEDA_OPERATOR_ID="0.0.xxxx"
    export HADEDA_OPERATOR_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-   ```
+```
 
    The private key must be PEM encoded. When using a hardware wallet, ensure the
    SDK or wallet software can produce the PEM representation of your Ed25519 key.
 3. Restart the terminal or source the profile to apply the changes.
 4. Verify the variables are available before launching R:
 
-   ```sh
+```sh
    echo "Operator ID: $HADEDA_OPERATOR_ID"
    printf "%s" "$HADEDA_OPERATOR_KEY" | head -n 2
-   ```
+```
 
 ## 3. Install R packages
 
 1. Install the development version of Hadeda and the supporting libraries:
 
-   ```r
-   install.packages("pak")
-   pak::pak(c("hadeda-r/hadeda", "openssl", "grpc", "jsonlite"))
-   ```
+```r
+install.packages("pak")
+pak::pak(c("hadeda-r/hadeda", "openssl", "grpc", "jsonlite"))
+```
 
 2. Confirm that `openssl::signature_create()` and `grpc::grpc_channel_create()`
    run without error in an interactive R session. On Linux you may need to set
@@ -62,23 +62,22 @@ exist on Windows via WSL, Chocolatey, or the official installers linked below.
 
 1. Choose a writable project directory and run the helper shipped with Hadeda:
 
-   ```r
+```r
    proto_root <- hadeda::hadeda_grpc_use_proto_bundle(dest = "proto", version = "0.47.0")
-   ```
+```
 
 2. Inspect the directory to confirm the `services/` folder and shared `.proto`
-   files exist. These paths feed into the `protoc` invocation demonstrated in the
-   gRPC vignette.
+1   gRPC vignette.
 
 ## 5. Validate network connectivity
 
 1. Use `grpcurl` to request network version info before attempting signed calls:
 
-   ```sh
+```sh
    grpcurl -plaintext -import-path "$proto_root" \
      -proto services/network_service.proto \
      testnet.hedera.com:50211 proto.NetworkService/getVersionInfo
-   ```
+```
 
    A JSON response indicates that your firewall allows outbound gRPC traffic.
 2. When running from restrictive networks (corporate VPNs, cloud CI, etc.), open
@@ -88,9 +87,9 @@ exist on Windows via WSL, Chocolatey, or the official installers linked below.
 
 1. Launch R in the project root and render the vignette manually:
 
-   ```r
+```r
    rmarkdown::render("vignettes/hadeda-grpc-setup.Rmd")
-   ```
+```
 
 2. Inspect the console output for messages about missing binaries or failed
    signatures. The helper functions throw descriptive errors when environment
