@@ -23,11 +23,35 @@ package.
 ## Prerequisites
 
 ```{r}
-# install.packages("pak")
+install_if_missing <- function(package, install_call) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    message(sprintf("Installing %s...", package))
+    eval(install_call)
+  }
+}
 
-credentials::git_credential_ask()
-remotes::install_github(c("NovaInstitute/Hadeda", "christiaanpauw/grpc"))
-pak::pak(c("openssl"))
+install_if_missing("pak", quote(install.packages("pak")))
+install_if_missing("credentials", quote(install.packages("credentials")))
+install_if_missing("remotes", quote(install.packages("remotes")))
+install_if_missing("jsonlite", quote(install.packages("jsonlite")))
+
+if (requireNamespace("credentials", quietly = TRUE)) {
+  credentials::git_credential_ask()
+}
+
+if (!requireNamespace("hadeda", quietly = TRUE)) {
+  remotes::install_github("NovaInstitute/Hadeda")
+}
+
+if (!requireNamespace("grpc", quietly = TRUE)) {
+  remotes::install_github("christiaanpauw/grpc")
+}
+
+if (requireNamespace("pak", quietly = TRUE)) {
+  pak::pak("openssl")
+} else {
+  install_if_missing("openssl", quote(install.packages("openssl")))
+}
 
 library(hadeda)
 library(grpc)
@@ -56,7 +80,13 @@ into a local directory, and returns the path you can pass to the compiler and
 `grpc` package.
 
 ```{r}
-proto_root <- hadeda_grpc_use_proto_bundle(dest = "proto", version = "0.47.0")
+bundle_dest <- "proto"
+if (!dir.exists(bundle_dest)) {
+  proto_root <- hadeda_grpc_use_proto_bundle(dest = bundle_dest, version = "0.47.0")
+} else {
+  proto_root <- normalizePath(bundle_dest)
+  message(sprintf("Using existing proto bundle at %s", proto_root))
+}
 list.files(proto_root, recursive = FALSE)
 ```
 
