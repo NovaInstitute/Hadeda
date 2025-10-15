@@ -131,3 +131,32 @@ test_that("hadeda gRPC configuration can host channel factories", {
   expect_type(config$grpc$port, "integer")
   expect_true(is.list(config$grpc))
 })
+
+test_that("hadeda_grpc_use_proto_bundle copies when rename fails", {
+  dest_dir <- file.path(tempdir(), paste0("hadeda-proto-", as.integer(Sys.time())))
+  on.exit(unlink(dest_dir, recursive = TRUE), add = TRUE)
+
+  testthat::local_mocked_bindings(
+    download.file = function(url, destfile, mode = "wb", quiet = TRUE) {
+      file.create(destfile)
+      invisible(0L)
+    },
+    unzip = function(zipfile, exdir) {
+      bundle <- file.path(exdir, "hedera-protobufs-test")
+      dir.create(file.path(bundle, "services"), recursive = TRUE, showWarnings = FALSE)
+      writeLines("syntax = \"proto3\";", file.path(bundle, "services", "network_service.proto"))
+      invisible(character())
+    },
+    .package = "utils"
+  )
+
+  testthat::local_mocked_bindings(
+    file.rename = function(from, to) FALSE,
+    .package = "base"
+  )
+
+  hadeda_grpc_use_proto_bundle(dest = dest_dir, version = "test", overwrite = TRUE)
+
+  expect_true(dir.exists(dest_dir))
+  expect_true(file.exists(file.path(dest_dir, "services", "network_service.proto")))
+})

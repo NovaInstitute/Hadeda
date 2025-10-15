@@ -48,17 +48,10 @@ exist on Windows via WSL, Chocolatey, or the official installers linked below.
 
 1. Install the development version of Hadeda and the supporting libraries:
 
-<<<<<<< HEAD
-```r
-install.packages("pak")
-pak::pak(c("hadeda-r/hadeda", "openssl", "grpc", "jsonlite"))
-```
-=======
    ```r
-   install.packages(c("remotes", "openssl", "jsonlite"))
-   remotes::install_github(c("hadeda-r/hadeda", "christiaanpauw/grpc"))
+   install.packages("pak")
+   pak::pak(c("hadeda-r/hadeda", "openssl", "grpc", "jsonlite"))
    ```
->>>>>>> 5d56e9d9be6a0404ef9b96bdb7c1e0e95ebc81dc
 
 2. Confirm that `openssl::signature_create()` and `grpc::grpc_channel_create()`
    run without error in an interactive R session. On Linux you may need to set
@@ -74,7 +67,7 @@ pak::pak(c("hadeda-r/hadeda", "openssl", "grpc", "jsonlite"))
 ```
 
 2. Inspect the directory to confirm the `services/` folder and shared `.proto`
-1   gRPC vignette.
+   files are present before running the gRPC vignette.
 
 ## 5. Validate network connectivity
 
