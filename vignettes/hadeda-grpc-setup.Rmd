@@ -26,8 +26,8 @@ package.
 # install.packages("pak")
 
 credentials::git_credential_ask()
-remotes::install_github(c("hadeda-r/hadeda", "christiaanpauw/grpc"))
-pak::pak(c("hadeda-r/hadeda", "openssl"))
+remotes::install_github(c("NovaInstitute/Hadeda", "christiaanpauw/grpc"))
+pak::pak(c("openssl"))
 
 library(hadeda)
 library(grpc)
