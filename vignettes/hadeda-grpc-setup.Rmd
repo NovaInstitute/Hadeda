@@ -15,17 +15,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-Hadeda delegates all gRPC traffic to user-supplied handler functions that live
-in `config$grpc`. This vignette walks through a fully worked example that
-compiles Hedera protobuf definitions, establishes a channel, configures Ed25519
-signing, and wires everything into Hadeda so that functions such as
-`crypto_account_info()` can execute over gRPC.
+Hadeda delegates all gRPC traffic to user-supplied handler functions that live in `config$grpc`. This vignette walks through a fully worked example that compiles Hedera protobuf definitions, establishes a channel, configures Ed25519 signing, and wires everything into Hadeda so that functions such as `crypto_account_info()` can execute over gRPC.
 
-Because this vignette interacts with live Hedera endpoints you must provide a
-funded testnet account via the `HADEDA_OPERATOR_ID` and `HADEDA_OPERATOR_KEY`
-environment variables. When these variables are missing the helper functions
-introduced below will raise informative errors so you can follow the
-"Environment setup instructions to allow gRPC testing" guide shipped with the
+Because this vignette interacts with live Hedera endpoints you must provide a funded testnet account via the `HADEDA_OPERATOR_ID` and `HADEDA_OPERATOR_KEY` environment variables. When these variables are missing the helper functions introduced below will raise informative errors so you can follow the "Environment setup instructions to allow gRPC testing" guide shipped with the
 package.
 
 ## Prerequisites
