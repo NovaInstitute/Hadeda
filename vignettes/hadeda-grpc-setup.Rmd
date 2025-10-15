@@ -35,6 +35,7 @@ install_if_missing("credentials", quote(install.packages("credentials")))
 install_if_missing("remotes", quote(install.packages("remotes")))
 install_if_missing("jsonlite", quote(install.packages("jsonlite")))
 install_if_missing("RProtoBuf", quote(install.packages("RProtoBuf")))
+install_if_missing("here", quote(install.packages("here")))
 
 if (requireNamespace("credentials", quietly = TRUE)) {
   credentials::git_credential_ask()
@@ -58,6 +59,7 @@ library(hadeda)
 library(grpc)
 library(jsonlite)
 library(RProtoBuf)
+library(here)
 ```
 
 You also need the Protocol Buffers compiler (`protoc`) and, for convenience,
@@ -82,7 +84,7 @@ into a local directory, and returns the path you can pass to the compiler and
 `grpc` package.
 
 ```{r}
-bundle_dest <- "proto"
+bundle_dest <- here::here("proto")
 if (!dir.exists(bundle_dest)) {
   proto_root <- hadeda_grpc_use_proto_bundle(dest = bundle_dest, version = "0.47.0")
 } else {
