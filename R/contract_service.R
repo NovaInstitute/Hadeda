@@ -3,6 +3,8 @@
 #' These helpers expose the remaining SmartContractService RPCs via tidy
 #' interfaces that normalise acknowledgements and query responses for downstream
 #' pipelines. All verbs currently require the gRPC transport.
+#'
+#' @name contract_service
 NULL
 
 #' Update mutable smart contract properties

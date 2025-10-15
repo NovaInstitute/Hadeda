@@ -4,12 +4,24 @@
 \alias{crypto_transaction_records}
 \title{Retrieve transaction records for a transaction ID}
 \usage{
-crypto_transaction_records(config, transaction_id, .transport = NULL)
+crypto_transaction_records(
+  config,
+  transaction_id,
+  include_duplicates = TRUE,
+  include_child_records = TRUE,
+  .transport = NULL
+)
 }
 \arguments{
 \item{config}{A configuration list from \code{\link[=hadeda_config]{hadeda_config()}}.}
 
 \item{transaction_id}{Transaction identifier string.}
+
+\item{include_duplicates}{Logical toggle requesting duplicate transaction
+records for the identifier. Defaults to \code{TRUE} for convenience.}
+
+\item{include_child_records}{Logical toggle requesting child transaction
+records spawned by the identifier. Defaults to \code{TRUE}.}
 
 \item{.transport}{Optional transport override.}
 }
@@ -17,6 +29,7 @@ crypto_transaction_records(config, transaction_id, .transport = NULL)
 A tibble with one row per record.
 }
 \description{
-Invoke the \code{getTransactionRecords} RPC which may return multiple records for a
-single transaction identifier (for example child transactions).
+Request duplicate or child records for a transaction identifier. The helper
+returns one row per duplicate or child record along with the parsed receipt
+and transfer metadata.
 }
