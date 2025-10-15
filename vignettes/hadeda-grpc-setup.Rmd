@@ -31,8 +31,8 @@ package.
 ## Prerequisites
 
 ```{r}
-# install.packages("pak")
-pak::pak(c("hadeda-r/hadeda", "openssl", "grpc"))
+# install.packages(c("remotes", "openssl", "jsonlite"))
+remotes::install_github(c("hadeda-r/hadeda", "christiaanpauw/grpc"))
 
 library(hadeda)
 library(grpc)
