@@ -49,8 +49,8 @@ exist on Windows via WSL, Chocolatey, or the official installers linked below.
 1. Install the development version of Hadeda and the supporting libraries:
 
    ```r
-   install.packages("pak")
-   pak::pak(c("hadeda-r/hadeda", "openssl", "grpc", "jsonlite"))
+   install.packages(c("remotes", "openssl", "jsonlite"))
+   remotes::install_github(c("hadeda-r/hadeda", "christiaanpauw/grpc"))
    ```
 
 2. Confirm that `openssl::signature_create()` and `grpc::grpc_channel_create()`
