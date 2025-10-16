@@ -127,6 +127,22 @@ crypto_stubs <- grpc::read_services(file.path(proto_root, "services", "crypto_se
 network_stubs <- grpc::read_services(file.path(proto_root, "services", "network_service.proto"))
 ```
 
+If you see an error such as `google/protobuf/wrappers.proto:0:1: File not found`,
+the Hedera bundle has been located correctly but the standard Google protobuf
+definitions are still missing from the import path. Installing `protoc` via
+Homebrew provides those headers under `file.path(system2("brew", c("--prefix",
+"protobuf"), stdout = TRUE), "include")`, so extend the option accordingly:
+
+```{r}
+google_proto_path <- file.path(system2("brew", c("--prefix", "protobuf"), stdout = TRUE), "include")
+options(
+  RProtoBuf.importPath = unique(c(getOption("RProtoBuf.importPath"), google_proto_path))
+)
+```
+
+On other platforms, point `google_proto_path` to the directory that contains
+`google/protobuf` from your Protocol Buffers installation.
+
 The `grpc::grpc_client()` helper turns those stubs into callables bound to a
 channel. The wrapper below returns a secure HTTP/2 channel connected to the
 public Hedera testnet. When you are done with a channel, remember to destroy it
