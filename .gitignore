@@ -4,3 +4,13 @@
 .Ruserdata
 inst/doc
 .DS_Store
+
+# Build artifacts
+hadeda_*.tar.gz
+
+# Local renv libraries and caches
+renv/library/
+renv/staging/
+
+# Bundled third-party binaries
+tools/pandoc/
