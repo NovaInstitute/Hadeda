@@ -17,7 +17,7 @@
     },
     "httr2": {
       "Package": "httr2",
-      "Version": "0.3.1",
+      "Version": "1.2.1",
       "Source": "Repository",
       "Repository": "CRAN"
     },
@@ -77,7 +77,7 @@
     },
     "httptest2": {
       "Package": "httptest2",
-      "Version": "0.5.0",
+      "Version": "1.2.1",
       "Source": "Repository",
       "Repository": "CRAN"
     },
