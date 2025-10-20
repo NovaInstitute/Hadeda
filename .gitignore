@@ -13,4 +13,4 @@ renv/library/
 renv/staging/
 
 # Bundled third-party binaries
-tools/pandoc/
+tools/pandoc/*
