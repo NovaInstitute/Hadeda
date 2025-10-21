@@ -1,0 +1,95 @@
+---
+title: "Creating Accounts and Topics with Hadeda"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Creating Accounts and Topics with Hadeda}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = interactive()
+)
+```
+
+This vignette walks through creating a Hedera account and a Hedera Consensus Service topic using the `hadeda` gRPC helpers. It assumes you have an operator account (ID + private key) funded on the Hedera testnet and that the required native gRPC libraries are installed. See `vignettes/hadeda-grpc-setup.Rmd` or the project README for environment setup details.
+
+> **Heads up**  
+> These examples submit live transactions and incur fees. Run them against testnet unless you explicitly intend to interact with mainnet.
+
+## 1. Load credentials
+
+`hadeda` looks for operator details via environment variables. You can set them before launching R:
+
+```bash
+export HADEDA_NETWORK=testnet
+export HADEDA_OPERATOR_ID=0.0.1234
+export HADEDA_OPERATOR_KEY=302e0201...
+```
+
+Alternatively, configure them in-session:
+
+```{r auth, eval = FALSE}
+library(hadeda)
+
+hadeda_auth_config(
+  network      = "testnet",
+  operator_id  = Sys.getenv("HADEDA_OPERATOR_ID"),
+  operator_key = Sys.getenv("HADEDA_OPERATOR_KEY")
+)
+```
+
+The helper stores credentials in-memory for subsequent gRPC calls.
+
+## 2. Generate a key for the new account
+
+Accounts must be created with a public key. Generate an ed25519 keypair:
+
+```{r generate-key, eval = FALSE}
+new_key <- hadeda_crypto_generate_private_key()
+pub_key <- hadeda_crypto_public_key(new_key)
+```
+
+Persist the private key securely if you plan to reuse this account later.
+
+## 3. Create the account
+
+Call `hadeda_crypto_create_account()` to submit the transaction. Initial balance is denominated in tinybars.
+
+```{r create-account, eval = FALSE}
+new_account <- hadeda_crypto_create_account(
+  public_key      = pub_key,
+  initial_balance = 10  # 10 tinybars
+)
+
+new_account$id
+```
+
+The returned tibble includes the new account ID and receipt metadata.
+
+## 4. Create a topic
+
+With the operator configured, creating a consensus topic is straightforward:
+
+```{r create-topic, eval = FALSE}
+new_topic <- hadeda_consensus_create_topic(
+  memo = "Demo topic created via hadeda vignette"
+)
+
+new_topic$id
+```
+
+Topics can be further customized by specifying admin or submit keys. Refer to `?hadeda_consensus_create_topic` for the full argument set.
+
+## 5. Next steps
+
+With the account and topic in place, you can:
+
+- Transfer HBAR or tokens using `hadeda_crypto_transfer()` and token helpers.
+- Submit messages to the topic with `hadeda_consensus_submit_message()`.
+- Manage topic permissions by rotating admin and submit keys.
+
+Explore the other vignettes (`hadeda-tokens.Rmd`, `hadeda-transactions.Rmd`) for extended workflows. Remember to clean up any testnet state you no longer need to avoid unnecessary fees.
