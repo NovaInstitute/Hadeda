@@ -12,6 +12,16 @@ Project setup is automated via the install scripts in `scripts/`:
   ```
   The script bootstraps Pandoc, ensures `pkg-config` and the gRPC native toolchain are present (via Homebrew or apt), restores the `renv` lockfile, and builds/install the package into a project-local library.
 
+  After the script finishes, start a fresh R session in the repo and run:
+
+  ```r
+  source("renv/activate.R")  # add the project library to .libPaths()
+  renv::install(".")         # install the hadeda source into renv/library
+  library(hadeda)
+  ```
+
+  If `library(hadeda)` later reports the package is missing, the session has likely lost the renv library path—rerun the trio above to reactivate the environment.
+
 - **Windows (PowerShell)**  
   ```powershell
   powershell -ExecutionPolicy Bypass -File .\scripts\install_hadeda.ps1
