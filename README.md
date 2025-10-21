@@ -30,6 +30,25 @@ Project setup is automated via the install scripts in `scripts/`:
 
 If you prefer managing dependencies manually, review the scripts for the exact prerequisites (Pandoc, pkg-config, gRPC headers/libraries) before running `renv::restore()` yourself.
 
+### Manual setup without the bootstrap scripts
+
+If you are unable to run the shell or PowerShell helpers, you can provision the project library manually from an R session:
+
+1. Start R in the repository root and source the activation script to ensure the local library is on the search path:
+   ```r
+   source("renv/activate.R")
+   ```
+2. Restore the dependencies pinned in `renv.lock`:
+   ```r
+   renv::restore()
+   ```
+3. (Optional) Install the package into the project library after dependencies have restored:
+   ```r
+   renv::install(".")
+   ```
+
+This mirrors the steps performed by the automation scripts and keeps your local environment aligned with the committed lockfile.
+
 ## Design goals
 
 * **Parity with Hedera SDKs** – provide coverage for the core feature set available in the official Hedera SDKs and protobuf definitions.
