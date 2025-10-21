@@ -44,6 +44,12 @@ hadeda_auth_config(
 
 The helper stores credentials in-memory for subsequent gRPC calls.
 
+> **Security tip**  
+> Store long-lived keys in an OS-backed vault via [`keyring`](https://cran.r-project.org/package=keyring)
+> (`keyring::key_set_with_value()` / `keyring::key_get()`) rather than plain-text `.Renviron` files. For temporary prompts,
+> combine `keyring` with [`askpass`](https://cran.r-project.org/package=askpass). Use `withr::with_envvar()` to inject values
+> for automated scripts without leaking them to the global session.
+
 ## 2. Generate a key for the new account
 
 Accounts must be created with a public key. Generate an ed25519 keypair:
@@ -53,7 +59,8 @@ new_key <- hadeda_crypto_generate_private_key()
 pub_key <- hadeda_crypto_public_key(new_key)
 ```
 
-Persist the private key securely if you plan to reuse this account later.
+Persist the private key securely if you plan to reuse this account later—`keyring` can store it under a descriptive service
+name (for example `hadeda/testnet-account-private-key`) and retrieve it only when required.
 
 ## 3. Create the account
 

@@ -86,6 +86,12 @@ the CryptoService gRPC helper. Configure a handler that delegates to your
 preferred SDK client and then call `crypto_create_account()` with the desired
 metadata:
 
+> **Security tip**  
+> Avoid committing keys or keeping them in plain-text files. Prefer storing them in an OS-backed vault via the
+> [`keyring`](https://cran.r-project.org/package=keyring) package (`keyring::key_set_with_value()` /
+> `keyring::key_get()`) and inject them into the session with `Sys.setenv()` or `withr::with_envvar()` for automation.
+> If you need an interactive prompt inside R, pair `keyring` with [`askpass`](https://cran.r-project.org/package=askpass).
+
 ```{r}
 created <- crypto_create_account(
   default,

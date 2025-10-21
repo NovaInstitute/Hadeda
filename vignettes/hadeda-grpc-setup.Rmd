@@ -206,6 +206,12 @@ sign_transaction <- hadeda_grpc_ed25519_signer()
 operator$public_key <- hadeda_grpc_signer_public_key(sign_transaction)
 ```
 
+> **Security tip**  
+> `hadeda_grpc_env_credentials()` expects your operator key to arrive via the environment. Prefer storing that key in an
+> OS-backed keyring (`keyring::key_set_with_value()` / `keyring::key_get()`) and exporting it with
+> `withr::with_envvar()` instead of committing it to `.Renviron`. When running interactively, `keyring` paired with
+> `askpass::askpass()` keeps secrets out of console history while still allowing on-demand prompts.
+
 The CryptoGetInfo query uses a two-step process:
 
 1. Submit a COST_ANSWER query with an empty payment to retrieve the fee.
