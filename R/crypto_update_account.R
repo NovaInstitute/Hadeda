@@ -18,6 +18,16 @@
 #'
 #' @return A tibble summarising the transaction metadata.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   crypto_update_account(
+#'     mirror,
+#'     account_id = "0.0.1234",
+#'     memo = "Updated account memo"
+#'   )
+#' }
+#'
 #' @export
 crypto_update_account <- function(config,
                                   account_id,

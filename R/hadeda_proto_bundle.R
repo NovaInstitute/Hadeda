@@ -11,6 +11,12 @@
 #'   version is already available locally.
 #'
 #' @return The path to the local protobuf bundle directory (invisible).
+#'
+#' @examples
+#' \dontrun{
+#'   hadeda_ensure_proto_bundle()
+#' }
+#'
 #' @export
 hadeda_ensure_proto_bundle <- function(version = "0.47.0", force = FALSE) {
   bundle_dir <- hadeda_proto_bundle_dir(create = FALSE)
@@ -56,6 +62,10 @@ hadeda_ensure_proto_bundle <- function(version = "0.47.0", force = FALSE) {
 #'
 #' @return A single string containing the downloaded version, or `NA` when no
 #'   bundle is available.
+#'
+#' @examples
+#' hadeda_proto_bundle_version()
+#'
 #' @export
 hadeda_proto_bundle_version <- function() {
   bundle_dir <- hadeda_proto_bundle_dir(create = FALSE)

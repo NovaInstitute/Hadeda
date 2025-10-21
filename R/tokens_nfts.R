@@ -58,6 +58,12 @@ tokens_nfts <- function(config,
 #'
 #' @return A tibble with a single NFT record.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   tokens_nft(mirror, token_id = "0.0.1001", serial_number = 1)
+#' }
+#'
 #' @export
 tokens_nft <- function(config,
                         token_id,

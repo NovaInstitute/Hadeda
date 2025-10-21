@@ -32,6 +32,16 @@ NULL
 #'
 #' @return A tibble summarising the transaction metadata.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   contract_update(
+#'     mirror,
+#'     contract_id = "0.0.9001",
+#'     memo = "Updated contract"
+#'   )
+#' }
+#'
 #' @export
 contract_update <- function(config,
                             contract_id,
@@ -160,6 +170,17 @@ hadeda_grpc_contract_update <- function(config,
 #'
 #' @return A tibble with the call metadata and `ContractFunctionResult` fields.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   contract_call_local(
+#'     mirror,
+#'     contract_id = "0.0.9001",
+#'     function_signature = "balanceOf(address)",
+#'     parameters = list("0.0.1234")
+#'   )
+#' }
+#'
 #' @export
 contract_call_local <- function(config,
                                  contract_id,
@@ -265,6 +286,12 @@ hadeda_grpc_contract_call_local <- function(config,
 #'
 #' @return A tibble summarising the deletion acknowledgement.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   contract_delete(mirror, contract_id = "0.0.9001")
+#' }
+#'
 #' @export
 contract_delete <- function(config,
                             contract_id,
@@ -344,6 +371,12 @@ hadeda_grpc_contract_delete <- function(config,
 #'
 #' @return A tibble describing the contract and associated staking metadata.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   contract_info(mirror, contract_id = "0.0.9001")
+#' }
+#'
 #' @export
 contract_info <- function(config,
                           contract_id,
@@ -396,6 +429,12 @@ hadeda_grpc_contract_info <- function(config, contract_id) {
 #' @inheritParams contract_call
 #'
 #' @return A tibble of transaction records.
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   contract_records(mirror, contract_id = "0.0.9001")
+#' }
 #'
 #' @export
 contract_records <- function(config,
@@ -452,6 +491,16 @@ hadeda_grpc_contract_records <- function(config, contract_id) {
 #' @param transaction_id Transaction identifier string.
 #'
 #' @return A tibble with a single transaction record.
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   contract_tx_record_by_id(
+#'     mirror,
+#'     contract_id = "0.0.9001",
+#'     transaction_id = "0.0.1234@1672531200.000000000"
+#'   )
+#' }
 #'
 #' @export
 contract_tx_record_by_id <- function(config,

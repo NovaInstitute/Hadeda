@@ -18,6 +18,17 @@
 #' @return A tibble containing acknowledgement metadata for the transfer
 #'   transaction.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' transfers <- tibble::tibble(
+#'   token_id = "0.0.6001",
+#'   account_id = "0.0.2002",
+#'   amount = 100
+#' )
+#' \dontrun{
+#'   tokens_transfer(mirror, transfers)
+#' }
+#'
 #' @export
 tokens_transfer <- function(config,
                              token_transfers,

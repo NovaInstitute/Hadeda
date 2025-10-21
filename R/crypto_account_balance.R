@@ -9,6 +9,12 @@
 #'
 #' @return A tibble with account, balance, timestamp, and token holdings.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   crypto_account_balance(mirror, account_id = "0.0.1234")
+#' }
+#'
 #' @export
 crypto_account_balance <- function(config,
                                    account_id,

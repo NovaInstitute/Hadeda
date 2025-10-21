@@ -14,6 +14,17 @@
 #' @return A tibble containing submission details including the assigned
 #'   sequence number and consensus timestamp.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   topics_message_submit(
+#'     mirror,
+#'     topic_id = "0.0.4001",
+#'     message = "Hello from Hadeda",
+#'     message_type = "text"
+#'   )
+#' }
+#'
 #' @export
 topics_message_submit <- function(config,
                                   topic_id,

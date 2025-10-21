@@ -22,6 +22,12 @@
 #' @return A tibble summarising the transaction acknowledgement and resulting
 #'   file identifier.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   file_create(mirror, contents = "Hello Hedera!")
+#' }
+#'
 #' @export
 file_create <- function(config,
                         contents,
@@ -108,6 +114,16 @@ hadeda_grpc_file_create <- function(config,
 #'
 #' @inheritParams file_create
 #' @param file_id File identifier to update.
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   file_update(
+#'     mirror,
+#'     file_id = "0.0.7001",
+#'     memo = "Updated memo"
+#'   )
+#' }
 #'
 #' @export
 file_update <- function(config,
@@ -203,6 +219,16 @@ hadeda_grpc_file_update <- function(config,
 #'
 #' @inheritParams file_update
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   file_append(
+#'     mirror,
+#'     file_id = "0.0.7001",
+#'     contents = " additional text"
+#'   )
+#' }
+#'
 #' @export
 file_append <- function(config,
                         file_id,
@@ -274,6 +300,12 @@ hadeda_grpc_file_append <- function(config,
 #'
 #' @inheritParams file_append
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   file_delete(mirror, file_id = "0.0.7001")
+#' }
+#'
 #' @export
 file_delete <- function(config,
                         file_id,
@@ -338,6 +370,12 @@ hadeda_grpc_file_delete <- function(config,
 #'
 #' @return A tibble with the file identifier, raw contents, and byte length.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   file_content(mirror, file_id = "0.0.7001")
+#' }
+#'
 #' @export
 file_content <- function(config,
                          file_id,
@@ -390,6 +428,12 @@ hadeda_grpc_file_content <- function(config, file_id) {
 #' @inheritParams file_delete
 #'
 #' @return A tibble describing the file metadata.
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   file_info(mirror, file_id = "0.0.7001")
+#' }
 #'
 #' @export
 file_info <- function(config,

@@ -23,6 +23,12 @@
 #'   this to `FALSE` to skip automatic signer creation.
 #'
 #' @return A configuration list compatible with `hadeda` helpers.
+#'
+#' @examples
+#' \dontrun{
+#'   config <- hadeda_auth_config(network = "testnet")
+#' }
+#'
 #' @export
 hadeda_auth_config <- function(
     network = c("testnet", "mainnet", "previewnet", "localhost"),

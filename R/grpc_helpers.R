@@ -11,6 +11,12 @@
 #'   `Sys.getenv("HADEDA_OPERATOR_KEY")`.
 #'
 #' @return A list with `operator_account_id` and `operator_private_key` entries.
+#'
+#' @examples
+#' \dontrun{
+#'   creds <- hadeda_grpc_env_credentials()
+#' }
+#'
 #' @export
 hadeda_grpc_env_credentials <- function(
   account_id = Sys.getenv("HADEDA_OPERATOR_ID"),
@@ -56,6 +62,13 @@ hadeda_grpc_env_credentials <- function(
 #'
 #' @return A function that accepts a raw vector of transaction bytes and
 #'   returns a raw vector containing the Ed25519 signature.
+#'
+#' @examples
+#' \dontrun{
+#'   signer <- hadeda_grpc_ed25519_signer()
+#'   signer(charToRaw("example"))
+#' }
+#'
 #' @export
 hadeda_grpc_ed25519_signer <- function(
   private_key_pem = Sys.getenv("HADEDA_OPERATOR_KEY"),
@@ -114,6 +127,11 @@ hadeda_grpc_ed25519_signer <- function(
 #' @param signer A function created by `hadeda_grpc_ed25519_signer()`.
 #'
 #' @return A raw vector containing the public key bytes.
+#'
+#' @examples
+#' signer <- structure(function(x) NULL, public_key = as.raw(1:32))
+#' hadeda_grpc_signer_public_key(signer)
+#'
 #' @export
 hadeda_grpc_signer_public_key <- function(signer) {
   pub <- attr(signer, "public_key", exact = TRUE)
@@ -139,6 +157,12 @@ hadeda_grpc_signer_public_key <- function(signer) {
 #'   `FALSE`.
 #'
 #' @return The path to the extracted protobuf directory (invisible).
+#'
+#' @examples
+#' \dontrun{
+#'   hadeda_grpc_use_proto_bundle(dest = tempdir())
+#' }
+#'
 #' @export
 hadeda_grpc_use_proto_bundle <- function(dest = "proto", version = "0.47.0", overwrite = FALSE) {
   url <- sprintf(

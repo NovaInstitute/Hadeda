@@ -19,6 +19,16 @@
 #' @return A tibble containing acknowledgement metadata for the association
 #'   transaction.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   tokens_associate(
+#'     mirror,
+#'     account_id = "0.0.1234",
+#'     token_ids = c("0.0.6001", "0.0.6002")
+#'   )
+#' }
+#'
 #' @export
 tokens_associate <- function(config,
                              account_id,

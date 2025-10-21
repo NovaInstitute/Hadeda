@@ -9,6 +9,12 @@
 #'
 #' @return A tibble with receipt metadata.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   crypto_transaction_receipts(mirror, transaction_id = "0.0.1234@1672531200.000000000")
+#' }
+#'
 #' @export
 crypto_transaction_receipts <- function(config,
                                         transaction_id,
@@ -65,6 +71,12 @@ hadeda_grpc_crypto_transaction_receipts <- function(config, transaction_id) {
 #'   records spawned by the identifier.
 #'
 #' @return A tibble with a single transaction record.
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   crypto_transaction_record(mirror, transaction_id = "0.0.1234@1672531200.000000000")
+#' }
 #'
 #' @export
 crypto_transaction_record <- function(config,
@@ -131,9 +143,15 @@ hadeda_grpc_crypto_transaction_record <- function(config,
 #'   records for the identifier. Defaults to `TRUE` for convenience.
 #' @param include_child_records Logical toggle requesting child transaction
 #'   records spawned by the identifier. Defaults to `TRUE`.
-#' 
+#'
 #' @return A tibble with one row per record.
-#' 
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   crypto_transaction_records(mirror, transaction_id = "0.0.1234@1672531200.000000000")
+#' }
+#'
 #' @export
 crypto_transaction_records <- function(config,
                                        transaction_id,

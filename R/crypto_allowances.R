@@ -16,6 +16,16 @@
 #'
 #' @return A tibble summarising the acknowledgement returned by the handler.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' allowances <- tibble::tibble(
+#'   spender_account_id = "0.0.5678",
+#'   amount = 1000
+#' )
+#' \dontrun{
+#'   crypto_approve_allowances(mirror, hbar_allowances = allowances)
+#' }
+#'
 #' @export
 crypto_approve_allowances <- function(config,
                                       hbar_allowances = NULL,
@@ -90,6 +100,16 @@ hadeda_grpc_crypto_approve_allowances <- function(config,
 #' a configured gRPC handler.
 #'
 #' @inheritParams crypto_approve_allowances
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' deletions <- tibble::tibble(
+#'   token_id = "0.0.6001",
+#'   spender_account_id = "0.0.5678"
+#' )
+#' \dontrun{
+#'   crypto_delete_allowances(mirror, token_allowances = deletions)
+#' }
 #'
 #' @export
 crypto_delete_allowances <- function(config,
