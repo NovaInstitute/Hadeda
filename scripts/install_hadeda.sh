@@ -168,13 +168,25 @@ if (!requireNamespace("renv", quietly = TRUE)) {
   install.packages("renv", repos = "https://cran.rstudio.com")
 }
 renv::consent(provided = TRUE)
-renv::restore(prompt = FALSE, library = Sys.getenv("RENV_PATHS_LIBRARY"))
+lib <- Sys.getenv("RENV_PATHS_LIBRARY")
+if (nzchar(lib)) {
+  .libPaths(c(lib, .libPaths()))
+}
+renv::restore(prompt = FALSE, library = lib)
 if (!requireNamespace("remotes", quietly = TRUE)) {
   install.packages("remotes", repos = "https://cran.rstudio.com")
 }
 if (!requireNamespace("grpc", quietly = TRUE)) {
+  lib <- Sys.getenv("RENV_PATHS_LIBRARY")
+  if (nzchar(lib)) {
+    .libPaths(c(lib, .libPaths()))
+  }
+  if (nzchar(lib)) {
+    unlink(file.path(lib, "Rcpp"), recursive = TRUE, force = TRUE)
+    unlink(file.path(lib, "grpc"), recursive = TRUE, force = TRUE)
+  }
   tryCatch(
-    remotes::install_github("christiaanpauw/grpc"),
+    remotes::install_github("christiaanpauw/grpc", lib = lib, upgrade = "never"),
     error = function(e) {
       stop("Failed to install grpc from GitHub (system gRPC libraries required): ", conditionMessage(e))
     }
