@@ -200,17 +200,34 @@ payment transaction. Hedera allows free queries up to a network-configured
 threshold; for this vignette we start by asking the network to price the query
 before submitting payment.
 
+Before creating the signer, make sure `HADEDA_OPERATOR_KEY` references a PEM
+encoded private key. If your operator secret is provided as a hexadecimal DER
+string, Hadeda can convert and store it for you:
+
+```{r eval=FALSE}
+hadeda_write_operator_key(
+  "302e020100300506032b657004220420e638e087c0dfe201b3519bd442033eba27b961a5fc969a7f4911b13ea2315769"
+)
+```
+
+The helper writes the key to `hadeda_operator_key_path()` (for example
+`~/.config/hadeda/operator_ed25519.pem`) and updates the environment variable so
+that subsequent calls see the PEM file automatically.
+
 ```{r}
 operator <- hadeda_grpc_env_credentials()
 sign_transaction <- hadeda_grpc_ed25519_signer()
 operator$public_key <- hadeda_grpc_signer_public_key(sign_transaction)
 ```
 
-> **Security tip**  
-> `hadeda_grpc_env_credentials()` expects your operator key to arrive via the environment. Prefer storing that key in an
-> OS-backed keyring (`keyring::key_set_with_value()` / `keyring::key_get()`) and exporting it with
-> `withr::with_envvar()` instead of committing it to `.Renviron`. When running interactively, `keyring` paired with
-> `askpass::askpass()` keeps secrets out of console history while still allowing on-demand prompts.
+> **Security tip**
+> `hadeda_grpc_env_credentials()` expects your operator key to arrive via the
+> environment. Convert hex keys with `hadeda_write_operator_key()` and prefer
+> storing the resulting PEM path in an OS-backed keyring (`keyring::key_set_with_value()` /
+> `keyring::key_get()`) or exporting it with `withr::with_envvar()` instead of
+> committing it to `.Renviron`. When running interactively, `keyring` paired with
+> `askpass::askpass()` keeps secrets out of console history while still allowing
+> on-demand prompts.
 
 The CryptoGetInfo query uses a two-step process:
 

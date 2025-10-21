@@ -49,6 +49,35 @@ If you are unable to run the shell or PowerShell helpers, you can provision the 
 
 This mirrors the steps performed by the automation scripts and keeps your local environment aligned with the committed lockfile.
 
+## Configuring operator credentials
+
+Hedera portals often provide operator private keys as hexadecimal DER strings
+(for example
+`302e020100300506032b657004220420e638e087c0dfe201b3519bd442033eba27b961a5fc969a7f4911b13ea2315769`). Hadeda's gRPC helpers expect
+PEM-encoded keys on disk. The package ships utilities to convert and store the
+key safely:
+
+```r
+hadeda_write_operator_key(
+  "302e020100300506032b657004220420e638e087c0dfe201b3519bd442033eba27b961a5fc969a7f4911b13ea2315769"
+)
+```
+
+The helper writes a PEM file to `hadeda_operator_key_path()` (for example
+`~/.config/hadeda/operator_ed25519.pem` on Linux/macOS or
+`%APPDATA%\\hadeda\\operator_ed25519.pem` on Windows) and sets the
+`HADEDA_OPERATOR_KEY` environment variable to the stored path. You can point
+Hadeda at an existing PEM by passing the text directly to
+`hadeda_write_operator_key()` or by setting the environment variable yourself:
+
+```r
+Sys.setenv(HADEDA_OPERATOR_KEY = hadeda_operator_key_path())
+```
+
+For unattended scripts, prefer injecting the path via launch-time environment
+variables (e.g., `.Renviron`, systemd unit files, or CI secrets) instead of
+embedding the private key in source code.
+
 ## Design goals
 
 * **Parity with Hedera SDKs** – provide coverage for the core feature set available in the official Hedera SDKs and protobuf definitions.
