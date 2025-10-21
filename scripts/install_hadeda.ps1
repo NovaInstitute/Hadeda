@@ -175,17 +175,29 @@ Ensure-PkgConfigBinary
 Ensure-GrpcNative
 
 $env:RENV_PATHS_LIBRARY = Join-Path $projectRoot "renv\library"
+$env:RENV_CONFIG_INSTALL_OVERWRITE = "TRUE"
+if (-not (Test-Path $env:RENV_PATHS_LIBRARY)) {
+  New-Item -ItemType Directory -Force -Path $env:RENV_PATHS_LIBRARY | Out-Null
+}
 
 Write-Step "Restoring renv dependencies and installing gRPC package"
 Rscript -e @'
+Sys.setenv(
+  RENV_PATHS_LIBRARY = Sys.getenv("RENV_PATHS_LIBRARY"),
+  RENV_CONFIG_INSTALL_OVERWRITE = Sys.getenv("RENV_CONFIG_INSTALL_OVERWRITE")
+)
 if (!requireNamespace("renv", quietly = TRUE)) {
   install.packages("renv", repos = "https://cran.rstudio.com")
 }
 renv::consent(provided = TRUE)
-renv::restore(prompt = FALSE)
+renv::restore(prompt = FALSE, library = Sys.getenv("RENV_PATHS_LIBRARY"))
 '@
 
 Rscript -e @'
+Sys.setenv(
+  RENV_PATHS_LIBRARY = Sys.getenv("RENV_PATHS_LIBRARY"),
+  RENV_CONFIG_INSTALL_OVERWRITE = Sys.getenv("RENV_CONFIG_INSTALL_OVERWRITE")
+)
 if (!requireNamespace("remotes", quietly = TRUE)) {
   install.packages("remotes", repos = "https://cran.rstudio.com")
 }

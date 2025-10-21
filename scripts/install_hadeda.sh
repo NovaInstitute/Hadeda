@@ -22,6 +22,8 @@ cd "$project_root"
 
 log "Running from $project_root"
 
+mkdir -p "$project_root/renv/library"
+
 need_cmd "curl"
 need_cmd "unzip"
 need_cmd "tar"
@@ -154,14 +156,19 @@ ensure_pkg_config
 ensure_grpc_native
 
 export RENV_PATHS_LIBRARY="$project_root/renv/library"
+export RENV_CONFIG_INSTALL_OVERWRITE=TRUE
 
 log "Restoring R package dependencies with renv and ensuring gRPC package is available"
 R --vanilla <<'RS'
+Sys.setenv(
+  RENV_PATHS_LIBRARY = Sys.getenv("RENV_PATHS_LIBRARY"),
+  RENV_CONFIG_INSTALL_OVERWRITE = Sys.getenv("RENV_CONFIG_INSTALL_OVERWRITE", unset = NA_character_)
+)
 if (!requireNamespace("renv", quietly = TRUE)) {
   install.packages("renv", repos = "https://cran.rstudio.com")
 }
 renv::consent(provided = TRUE)
-renv::restore(prompt = FALSE)
+renv::restore(prompt = FALSE, library = Sys.getenv("RENV_PATHS_LIBRARY"))
 if (!requireNamespace("remotes", quietly = TRUE)) {
   install.packages("remotes", repos = "https://cran.rstudio.com")
 }
