@@ -66,6 +66,22 @@ You also need the Protocol Buffers compiler (`protoc`) and, for convenience,
 the `grpcurl` command line utility. Both tools are available via Homebrew,
 Chocolatey, or package managers for most Linux distributions.
 
+```{r proto_dependency_check, eval=TRUE}
+has_protoc <- system("protoc --version", ignore.stdout = TRUE, ignore.stderr = TRUE) == 0
+has_grpcurl <- system("grpcurl --version", ignore.stdout = TRUE, ignore.stderr = TRUE) == 0
+
+if (has_protoc && has_grpcurl) {
+  message("`protoc` and `grpcurl` are already available on this system.")
+} else {
+  if (!has_protoc) {
+    message("`protoc` is not installed. Use the commands below to add it before proceeding.")
+  }
+  if (!has_grpcurl) {
+    message("`grpcurl` is not installed. Use the commands below to add it before proceeding.")
+  }
+}
+```
+
 ```sh
 # macOS using Homebrew
 brew install protobuf grpcurl
