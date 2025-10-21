@@ -15,6 +15,16 @@
 #'   precheck status, receipt status, consensus timestamp, and the raw transport
 #'   response.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   consensus_submit_message(
+#'     mirror,
+#'     topic_id = "0.0.4001",
+#'     message = "Hello from Hadeda"
+#'   )
+#' }
+#'
 #' @export
 consensus_submit_message <- function(config,
                                      topic_id,
@@ -94,6 +104,19 @@ consensus_submit_message <- function(config,
 #'
 #' @return A tibble summarising acknowledgement details for the submitted
 #'   chunk, mirroring the structure returned by `consensus_submit_message()`.
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   consensus_submit_message_chunk(
+#'     mirror,
+#'     topic_id = "0.0.4001",
+#'     message = "Part 1",
+#'     chunk_number = 1,
+#'     total_chunks = 2,
+#'     initial_transaction_id = "0.0.1234@1672531200.000000000"
+#'   )
+#' }
 #'
 #' @export
 consensus_submit_message_chunk <- function(config,

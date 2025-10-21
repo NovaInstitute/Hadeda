@@ -29,6 +29,13 @@
 #'
 #' @return A tibble summarising the deployment transaction metadata.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' bytecode <- "608060405234801561001057600080fd5b..."
+#' \dontrun{
+#'   contract_deploy(mirror, bytecode = bytecode, gas = 2e5)
+#' }
+#'
 #' @export
 contract_deploy <- function(config,
                             bytecode = NULL,

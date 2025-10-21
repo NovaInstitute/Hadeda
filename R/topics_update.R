@@ -8,6 +8,12 @@
 #' @return A tibble containing the updated topic metadata and transaction
 #'   details.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   topics_update(mirror, topic_id = "0.0.4001", memo = "Updated topic memo")
+#' }
+#'
 #' @export
 topics_update <- function(config,
                           topic_id,

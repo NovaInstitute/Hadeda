@@ -9,6 +9,12 @@
 #'   gRPC response is returned in a `response` list-column for downstream
 #'   inspection.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   consensus_topic_info(mirror, topic_id = "0.0.4001")
+#' }
+#'
 #' @export
 consensus_topic_info <- function(config,
                                  topic_id,

@@ -19,6 +19,16 @@
 #'
 #' @return A tibble summarising the resulting transaction metadata.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' transfers <- tibble::tibble(
+#'   account_id = c("0.0.1234", "0.0.5678"),
+#'   amount = c(100, -100)
+#' )
+#' \dontrun{
+#'   crypto_transfer(mirror, transfers = transfers)
+#' }
+#'
 #' @export
 crypto_transfer <- function(config,
                             transfers,

@@ -10,6 +10,16 @@
 #'
 #' @return A tibble summarising the transaction metadata.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   crypto_delete(
+#'     mirror,
+#'     account_id = "0.0.1234",
+#'     transfer_account_id = "0.0.5678"
+#'   )
+#' }
+#'
 #' @export
 crypto_delete <- function(config,
                           account_id,

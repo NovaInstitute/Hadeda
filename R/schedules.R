@@ -12,6 +12,12 @@
 #'
 #' @return A tibble describing scheduled transactions.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   schedules_list(mirror, limit = 5)
+#' }
+#'
 #' @export
 schedules_list <- function(config,
                            limit = NULL,
@@ -57,6 +63,12 @@ schedules_list <- function(config,
 #' @inheritParams schedules_list
 #'
 #' @return A tibble with a single row describing the requested schedule.
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   schedules_get(mirror, schedule_id = "0.0.8001")
+#' }
 #'
 #' @export
 schedules_get <- function(config,
@@ -116,6 +128,16 @@ schedules_get <- function(config,
 #'   wait for a transaction receipt acknowledgement.
 #'
 #' @return A tibble summarising the scheduled transaction acknowledgement.
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   schedule_create(
+#'     mirror,
+#'     scheduled_transaction = list(type = "cryptoTransfer"),
+#'     memo = "Demo schedule"
+#'   )
+#' }
 #'
 #' @export
 schedule_create <- function(config,
@@ -206,6 +228,12 @@ schedule_create <- function(config,
 #'
 #' @return A tibble summarising the acknowledgement.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   schedule_sign(mirror, schedule_id = "0.0.8001")
+#' }
+#'
 #' @export
 schedule_sign <- function(config,
                           schedule_id,
@@ -253,6 +281,12 @@ schedule_sign <- function(config,
 #'
 #' @return A tibble summarising the acknowledgement.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   schedule_delete(mirror, schedule_id = "0.0.8001")
+#' }
+#'
 #' @export
 schedule_delete <- function(config,
                             schedule_id,
@@ -293,6 +327,12 @@ schedule_delete <- function(config,
 #' @inheritParams schedule_sign
 #'
 #' @return A tibble with schedule metadata and the raw response.
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   schedule_info(mirror, schedule_id = "0.0.8001")
+#' }
 #'
 #' @export
 schedule_info <- function(config,

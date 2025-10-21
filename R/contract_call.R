@@ -29,6 +29,17 @@
 #'   Keccak-256 the function aborts with guidance to provide pre-encoded
 #'   `call_data`.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   contract_call(
+#'     mirror,
+#'     contract_id = "0.0.9001",
+#'     function_signature = "transfer(address,uint256)",
+#'     parameters = list("0.0.1234", 100)
+#'   )
+#' }
+#'
 #' @export
 contract_call <- function(config,
                           contract_id,

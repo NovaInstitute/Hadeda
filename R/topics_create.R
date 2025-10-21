@@ -12,6 +12,12 @@
 #' @return A tibble containing the created topic metadata and transaction
 #'   details.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   topics_create(mirror, memo = "hadeda demo topic")
+#' }
+#'
 #' @export
 topics_create <- function(config,
                           memo = NULL,

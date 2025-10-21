@@ -8,6 +8,12 @@
 #'
 #' @return A tibble of transaction records.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   crypto_account_records(mirror, account_id = "0.0.1234")
+#' }
+#'
 #' @export
 crypto_account_records <- function(config,
                                    account_id,

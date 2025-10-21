@@ -7,6 +7,12 @@
 #'
 #' @return A tibble with a single row describing the block.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   blocks_get(mirror, block = 123456)
+#' }
+#'
 #' @export
 blocks_get <- function(config, block, .transport = NULL) {
   transport <- hadeda_choose_transport(config, .transport, rest_supported = TRUE, grpc_supported = FALSE)

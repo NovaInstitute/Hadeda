@@ -8,6 +8,12 @@
 #'
 #' @return A tibble with a single row describing the requested topic.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   topics_get(mirror, topic_id = "0.0.4001")
+#' }
+#'
 #' @export
 topics_get <- function(config,
                        topic_id,

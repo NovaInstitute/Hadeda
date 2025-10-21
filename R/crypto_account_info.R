@@ -7,6 +7,12 @@
 #'
 #' @return A tibble with one row containing account metadata.
 #'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   crypto_account_info(mirror, account_id = "0.0.1234")
+#' }
+#'
 #' @export
 crypto_account_info <- function(config,
                                 account_id,
@@ -58,6 +64,12 @@ hadeda_grpc_crypto_account_info <- function(config, account_id) {
 #' downstream inspection.
 #'
 #' @inheritParams crypto_account_balance
+#'
+#' @examples
+#' mirror <- hadeda_config(network = "testnet")
+#' \dontrun{
+#'   crypto_account_details(mirror, account_id = "0.0.1234")
+#' }
 #'
 #' @export
 crypto_account_details <- function(config,
