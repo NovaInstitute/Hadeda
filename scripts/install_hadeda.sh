@@ -27,6 +27,47 @@ need_cmd "unzip"
 need_cmd "tar"
 need_cmd "R"
 
+ensure_pkg_config() {
+  if command -v pkg-config >/dev/null 2>&1; then
+    return
+  fi
+
+  if command -v brew >/dev/null 2>&1; then
+    log "Installing pkg-config via Homebrew"
+    brew install pkg-config
+  elif command -v apt-get >/dev/null 2>&1; then
+    log "Installing pkg-config via apt-get"
+    sudo apt-get update
+    sudo apt-get install -y pkg-config
+  else
+    die "pkg-config not found and automatic installation is unsupported on this platform; install it manually and retry."
+  fi
+
+  command -v pkg-config >/dev/null 2>&1 || die "pkg-config installation failed; ensure it is on PATH."
+}
+
+ensure_grpc_native() {
+  if pkg-config --exists grpc grpc++; then
+    log "gRPC development libraries detected via pkg-config"
+    return
+  fi
+
+  if command -v brew >/dev/null 2>&1; then
+    log "Installing gRPC via Homebrew"
+    brew install grpc
+  elif command -v apt-get >/dev/null 2>&1; then
+    log "Installing gRPC via apt-get"
+    sudo apt-get update
+    sudo apt-get install -y libgrpc-dev protobuf-compiler-grpc
+  else
+    die "gRPC development libraries not found and automatic installation is unsupported on this platform; install gRPC (including pkg-config metadata) and retry."
+  fi
+
+  if ! pkg-config --exists grpc grpc++; then
+    die "pkg-config still cannot find gRPC after installation; check that grpc.pc is on PKG_CONFIG_PATH."
+  fi
+}
+
 ensure_pandoc() {
   if command -v pandoc >/dev/null 2>&1; then
     log "System pandoc detected at $(command -v pandoc)"
@@ -109,16 +150,29 @@ ensure_pandoc() {
 }
 
 ensure_pandoc
+ensure_pkg_config
+ensure_grpc_native
 
 export RENV_PATHS_LIBRARY="$project_root/renv/library"
 
-log "Restoring R package dependencies with renv"
+log "Restoring R package dependencies with renv and ensuring gRPC package is available"
 R --vanilla <<'RS'
 if (!requireNamespace("renv", quietly = TRUE)) {
   install.packages("renv", repos = "https://cran.rstudio.com")
 }
 renv::consent(provided = TRUE)
 renv::restore(prompt = FALSE)
+if (!requireNamespace("remotes", quietly = TRUE)) {
+  install.packages("remotes", repos = "https://cran.rstudio.com")
+}
+if (!requireNamespace("grpc", quietly = TRUE)) {
+  tryCatch(
+    remotes::install_github("christiaanpauw/grpc"),
+    error = function(e) {
+      stop("Failed to install grpc from GitHub (system gRPC libraries required): ", conditionMessage(e))
+    }
+  )
+}
 RS
 
 log "Building hadeda package"

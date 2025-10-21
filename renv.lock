@@ -15,6 +15,24 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
+    "formatR": {
+      "Package": "formatR",
+      "Version": "1.14",
+      "Source": "Repository",
+      "Repository": "CRAN"
+    },
+    "futile.logger": {
+      "Package": "futile.logger",
+      "Version": "1.4.3",
+      "Source": "Repository",
+      "Repository": "CRAN"
+    },
+    "futile.options": {
+      "Package": "futile.options",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN"
+    },
     "httr2": {
       "Package": "httr2",
       "Version": "1.2.1",
@@ -27,6 +45,12 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
+    "lambda.r": {
+      "Package": "lambda.r",
+      "Version": "1.2.4",
+      "Source": "Repository",
+      "Repository": "CRAN"
+    },
     "lifecycle": {
       "Package": "lifecycle",
       "Version": "1.0.4",
@@ -36,6 +60,18 @@
     "purrr": {
       "Package": "purrr",
       "Version": "1.0.2",
+      "Source": "Repository",
+      "Repository": "CRAN"
+    },
+    "RProtoBuf": {
+      "Package": "RProtoBuf",
+      "Version": "0.4.24",
+      "Source": "Repository",
+      "Repository": "CRAN"
+    },
+    "Rcpp": {
+      "Package": "Rcpp",
+      "Version": "1.1.0",
       "Source": "Repository",
       "Repository": "CRAN"
     },
@@ -104,6 +140,27 @@
       "Version": "3.2.1",
       "Source": "Repository",
       "Repository": "CRAN"
+    },
+    "grpc": {
+      "Package": "grpc",
+      "Version": "0.2.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "grpc",
+      "RemoteUsername": "christiaanpauw",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "16af1ff6b554d3b032e9bead176f60c7852687c3",
+      "Requirements": [
+        "R",
+        "formatR",
+        "futile.logger",
+        "futile.options",
+        "lambda.r",
+        "RProtoBuf",
+        "Rcpp",
+        "methods"
+      ]
     }
   }
 }

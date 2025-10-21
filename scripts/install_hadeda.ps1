@@ -95,15 +95,106 @@ function Ensure-Pandoc {
 
 Ensure-Pandoc
 
+function Ensure-PkgConfigBinary {
+  if (Get-Command "pkg-config.exe" -ErrorAction SilentlyContinue) {
+    return
+  }
+
+  if (Get-Command "choco" -ErrorAction SilentlyContinue) {
+    Write-Step "Installing pkg-config via Chocolatey"
+    choco install pkgconfiglite -y --no-progress
+  }
+  elseif (Get-Command "winget" -ErrorAction SilentlyContinue) {
+    Write-Step "Installing pkg-config via winget (MSYS2)"
+    winget install --id MSYS2.MSYS2 -e --source winget
+    $msysPath = "C:\msys64\usr\bin"
+    if (Test-Path $msysPath) {
+      $env:PATH = "$msysPath;$env:PATH"
+    }
+  }
+  else {
+    throw "pkg-config not found and no supported package manager available. Install pkg-config manually (e.g. Chocolatey 'pkgconfiglite') and rerun the script."
+  }
+
+  if (-not (Get-Command "pkg-config.exe" -ErrorAction SilentlyContinue)) {
+    throw "pkg-config installation failed; ensure it is accessible on PATH."
+  }
+}
+
+function Ensure-GrpcNative {
+  $grpcDetected = (Start-Process -FilePath "pkg-config" -ArgumentList "--exists", "grpc", "grpc++" -NoNewWindow -Wait -PassThru).ExitCode -eq 0
+  if ($grpcDetected) {
+    Write-Step "gRPC development libraries detected via pkg-config"
+    return
+  }
+
+  if (Get-Command "choco" -ErrorAction SilentlyContinue) {
+    if (-not (Get-Command "vcpkg.exe" -ErrorAction SilentlyContinue)) {
+      Write-Step "Installing vcpkg via Chocolatey to provide gRPC libraries"
+      choco install vcpkg -y --no-progress
+    }
+  }
+  elseif (Get-Command "winget" -ErrorAction SilentlyContinue) {
+    if (-not (Get-Command "vcpkg.exe" -ErrorAction SilentlyContinue)) {
+      Write-Step "Installing vcpkg via winget to provide gRPC libraries"
+      winget install --id Microsoft.Vcpkg -e --source winget
+    }
+  }
+  else {
+    throw "gRPC development libraries not detected and no supported package manager found. Install gRPC (with pkg-config metadata) manually and rerun."
+  }
+
+  $vcpkgExe = Get-Command "vcpkg.exe" -ErrorAction SilentlyContinue
+  if (-not $vcpkgExe) {
+    throw "vcpkg installation failed; ensure vcpkg.exe is on PATH."
+  }
+
+  $triplet = "x64-windows"
+  Write-Step "Installing gRPC via vcpkg ($triplet)"
+  & $vcpkgExe.Source install "grpc:$triplet" --recurse
+
+  $pkgconfigPath = Join-Path (Split-Path $vcpkgExe.Source) "installed\$triplet\lib\pkgconfig"
+  if (Test-Path $pkgconfigPath) {
+    if ($env:PKG_CONFIG_PATH) {
+      $env:PKG_CONFIG_PATH = "$pkgconfigPath;$env:PKG_CONFIG_PATH"
+    }
+    else {
+      $env:PKG_CONFIG_PATH = $pkgconfigPath
+    }
+  }
+
+  $grpcDetected = (Start-Process -FilePath "pkg-config" -ArgumentList "--exists", "grpc", "grpc++" -NoNewWindow -Wait -PassThru).ExitCode -eq 0
+  if (-not $grpcDetected) {
+    throw "pkg-config still cannot locate gRPC after attempted installation. Ensure the pkgconfig directory is exported via PKG_CONFIG_PATH."
+  }
+
+  Write-Step "gRPC development libraries installed via vcpkg"
+}
+
+Ensure-PkgConfigBinary
+Ensure-GrpcNative
+
 $env:RENV_PATHS_LIBRARY = Join-Path $projectRoot "renv\library"
 
-Write-Step "Restoring renv dependencies"
+Write-Step "Restoring renv dependencies and installing gRPC package"
 Rscript -e @'
 if (!requireNamespace("renv", quietly = TRUE)) {
   install.packages("renv", repos = "https://cran.rstudio.com")
 }
 renv::consent(provided = TRUE)
 renv::restore(prompt = FALSE)
+'@
+
+Rscript -e @'
+if (!requireNamespace("remotes", quietly = TRUE)) {
+  install.packages("remotes", repos = "https://cran.rstudio.com")
+}
+if (!requireNamespace("grpc", quietly = TRUE)) {
+  tryCatch(
+    remotes::install_github("christiaanpauw/grpc"),
+    error = function(e) stop("Failed to install grpc from GitHub (system gRPC libraries required): ", conditionMessage(e), call. = FALSE)
+  )
+}
 '@
 
 Write-Step "Building package (this may take a few minutes)"
