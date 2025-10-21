@@ -2,6 +2,24 @@
 
 Hadeda is an R package that aims to provide idiomatic tidyverse wrappers around the Hashgraph Hedera network APIs. The package will expose a consistent set of high-level functions that map directly to Hedera REST and gRPC endpoints, returning tidy data structures to simplify downstream analysis, monitoring, and workflow automation in R.
 
+## Installation
+
+Project setup is automated via the install scripts in `scripts/`:
+
+- **macOS / Linux**  
+  ```bash
+  ./scripts/install_hadeda.sh
+  ```
+  The script bootstraps Pandoc, ensures `pkg-config` and the gRPC native toolchain are present (via Homebrew or apt), restores the `renv` lockfile, and builds/install the package into a project-local library.
+
+- **Windows (PowerShell)**  
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\scripts\install_hadeda.ps1
+  ```
+  This variant handles Pandoc, installs `pkg-config` and gRPC libraries (via Chocolatey/winget + vcpkg), restores dependencies, and builds/install the package.
+
+If you prefer managing dependencies manually, review the scripts for the exact prerequisites (Pandoc, pkg-config, gRPC headers/libraries) before running `renv::restore()` yourself.
+
 ## Design goals
 
 * **Parity with Hedera SDKs** – provide coverage for the core feature set available in the official Hedera SDKs and protobuf definitions.
