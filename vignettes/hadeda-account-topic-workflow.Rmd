@@ -35,11 +35,14 @@ Alternatively, configure them in-session:
 ```{r auth, eval = FALSE}
 library(hadeda)
 
-hadeda_auth_config(
+config <- hadeda_auth_config(
   network      = "testnet",
   operator_id  = Sys.getenv("HADEDA_OPERATOR_ID"),
   operator_key = Sys.getenv("HADEDA_OPERATOR_KEY")
 )
+
+# Merge your gRPC handler definitions (see hadeda-grpc-setup vignette)
+# config$grpc <- modifyList(config$grpc, grpc_handler)
 ```
 
 The helper stores credentials in-memory for subsequent gRPC calls.
@@ -67,7 +70,8 @@ name (for example `hadeda/testnet-account-private-key`) and retrieve it only whe
 Call `hadeda_crypto_create_account()` to submit the transaction. Initial balance is denominated in tinybars.
 
 ```{r create-account, eval = FALSE}
-new_account <- hadeda_crypto_create_account(
+new_account <- crypto_create_account(
+  config,
   public_key      = pub_key,
   initial_balance = 10  # 10 tinybars
 )
@@ -82,14 +86,16 @@ The returned tibble includes the new account ID and receipt metadata.
 With the operator configured, creating a consensus topic is straightforward:
 
 ```{r create-topic, eval = FALSE}
-new_topic <- hadeda_consensus_create_topic(
-  memo = "Demo topic created via hadeda vignette"
+new_topic <- topics_create(
+  config,
+  memo = "Demo topic created via hadeda vignette",
+  .transport = "rest"  # topic creation currently routes through REST
 )
 
 new_topic$id
 ```
 
-Topics can be further customized by specifying admin or submit keys. Refer to `?hadeda_consensus_create_topic` for the full argument set.
+The REST transport targets Hashio's Mirror Node by default; set `config$rest$base_url` and headers (for example an `X-API-Key`) if you use a different provider. Topics can be further customized by specifying admin or submit keys. Refer to `?topics_create` for the full argument set.
 
 ## 5. Next steps
 
