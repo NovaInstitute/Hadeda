@@ -35,7 +35,7 @@ Alternatively, configure them in-session:
 ```{r auth, eval = FALSE}
 library(hadeda)
 
-config <- hadeda_auth_config(
+config <- hadeda::hadeda_auth_config(
   network      = "testnet",
   operator_id  = Sys.getenv("HADEDA_OPERATOR_ID"),
   operator_key = Sys.getenv("HADEDA_OPERATOR_KEY")
