@@ -129,35 +129,48 @@ keep the bundle intact when wiring everything together in R.
 ## Register services with the `grpc` package
 
 Recent releases of the R `grpc` package consume `.proto` definitions directly
-instead of relying on precompiled descriptor sets. Configure `RProtoBuf` so it
-can resolve Hedera's shared message definitions before loading the services you
-plan to call.
+instead of relying on precompiled descriptor sets. Gather the directories that
+contain Hedera's schemas and forward them to `hadeda_read_services2()` via the
+`proto_path` argument so that `RProtoBuf` can resolve shared imports before
+parsing the service declarations.
 
 ```{r}
 proto_paths <- c(proto_root, file.path(proto_root, "services"))
-options(
-  RProtoBuf.importPath = unique(c(getOption("RProtoBuf.importPath"), proto_paths))
-)
 
-crypto_stubs <- hadeda_read_services2(file.path(proto_root, "services", "crypto_service.proto"))
-network_stubs <- hadeda_read_services2(file.path(proto_root, "services", "network_service.proto"))
+crypto_stubs <- hadeda_read_services2(
+  file.path(proto_root, "services", "crypto_service.proto"),
+  proto_path = proto_paths
+)
+network_stubs <- hadeda_read_services2(
+  file.path(proto_root, "services", "network_service.proto"),
+  proto_path = proto_paths
+)
 ```
 
 If you see an error such as `google/protobuf/wrappers.proto:0:1: File not found`,
 the Hedera bundle has been located correctly but the standard Google protobuf
 definitions are still missing from the import path. Installing `protoc` via
 Homebrew provides those headers under `file.path(system2("brew", c("--prefix",
-"protobuf"), stdout = TRUE), "include")`, so extend the option accordingly:
+"protobuf"), stdout = TRUE), "include")`. Extend `proto_paths` with that
+directory and reload the services:
 
 ```{r}
 google_proto_path <- file.path(system2("brew", c("--prefix", "protobuf"), stdout = TRUE), "include")
-options(
-  RProtoBuf.importPath = unique(c(getOption("RProtoBuf.importPath"), google_proto_path))
+proto_paths <- unique(c(proto_paths, google_proto_path))
+
+crypto_stubs <- hadeda_read_services2(
+  file.path(proto_root, "services", "crypto_service.proto"),
+  proto_path = proto_paths
+)
+network_stubs <- hadeda_read_services2(
+  file.path(proto_root, "services", "network_service.proto"),
+  proto_path = proto_paths
 )
 ```
 
 On other platforms, point `google_proto_path` to the directory that contains
-`google/protobuf` from your Protocol Buffers installation.
+`google/protobuf` from your Protocol Buffers installation before rerunning the
+service loader.
 
 The `grpc::grpc_client()` helper turns those stubs into callables bound to a
 channel. The wrapper below returns a secure HTTP/2 channel connected to the
@@ -396,9 +409,9 @@ sourced directly from Hedera consensus nodes through gRPC.
 - gRPC requires HTTP/2 with TLS. When connecting to Hedera's testnet include the
   `grpc.ssl_target_name_override` option shown above so the certificate matches
   the service name.
-- If `grpc::read_services()` reports unresolved imports, double-check that
-  `options('RProtoBuf.importPath')` includes the bundle directories listed
-  earlier.
+- If `grpc::read_services()` reports unresolved imports, confirm that the
+  `proto_paths` vector contains every directory referenced by your service
+  definitions before reloading them with `hadeda_read_services2()`.
 - When the network rejects a transaction because of invalid signatures, double
   check that the Ed25519 key is correct and that your system clock is in sync.
 

@@ -13,6 +13,9 @@
 #'   [RProtoBuf::readProtoFiles()]. When `NULL`, the default expression is used.
 #' @param lib.loc Library path vector forwarded to
 #'   [RProtoBuf::readProtoFiles()].
+#' @param proto_path Character vector of additional import directories passed to
+#'   the `protoPath` argument of [RProtoBuf::readProtoFiles()]. Use this when
+#'   your service definitions import protos located outside the bundle root.
 #'
 #' @return A named list describing the RPC stubs in the `.proto` definition.
 #'   The structure matches the output produced by `grpc::read_services()` so it
@@ -21,7 +24,8 @@
 hadeda_read_services2 <- function(file,
                                   package = "RProtoBuf",
                                   pattern = "\\.proto$",
-                                  lib.loc = NULL) {
+                                  lib.loc = NULL,
+                                  proto_path = NULL) {
   rlang::check_installed("RProtoBuf", reason = "for loading protobuf service definitions")
 
   file_path <- normalizePath(file, mustWork = TRUE)
@@ -35,6 +39,9 @@ hadeda_read_services2 <- function(file,
   }
   if (!is.null(lib.loc)) {
     proto_args$lib.loc <- lib.loc
+  }
+  if (!is.null(proto_path)) {
+    proto_args$protoPath <- normalizePath(proto_path, mustWork = TRUE)
   }
 
   do.call(RProtoBuf::readProtoFiles, proto_args)

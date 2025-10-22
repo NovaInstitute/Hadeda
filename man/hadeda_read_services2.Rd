@@ -12,7 +12,8 @@ hadeda_read_services2(
   file,
   package = "RProtoBuf",
   pattern = "\\\\.proto$",
-  lib.loc = NULL
+  lib.loc = NULL,
+  proto_path = NULL
 )
 }
 \arguments{
@@ -25,6 +26,10 @@ hadeda_read_services2(
     expression.}
   \item{lib.loc}{Library location vector handed to
     \code{RProtoBuf::readProtoFiles()}.}
+  \item{proto_path}{Character vector of additional import directories forwarded
+    to the \code{protoPath} argument of \code{RProtoBuf::readProtoFiles()}.
+    Supply this when your services reference protos located outside the
+    immediate bundle.}
 }
 \value{
 A named list describing the RPC stubs defined in \code{file}. The structure
