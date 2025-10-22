@@ -139,8 +139,8 @@ options(
   RProtoBuf.importPath = unique(c(getOption("RProtoBuf.importPath"), proto_paths))
 )
 
-crypto_stubs <- grpc::read_services(file.path(proto_root, "services", "crypto_service.proto"))
-network_stubs <- grpc::read_services(file.path(proto_root, "services", "network_service.proto"))
+crypto_stubs <- hadeda_read_services2(file.path(proto_root, "services", "crypto_service.proto"))
+network_stubs <- hadeda_read_services2(file.path(proto_root, "services", "network_service.proto"))
 ```
 
 If you see an error such as `google/protobuf/wrappers.proto:0:1: File not found`,
