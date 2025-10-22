@@ -32,6 +32,7 @@ Suggests:
     devtools,
     grpc,
     openssl,
+    RProtoBuf,
     httptest2,
     lintr,
     mockery,
