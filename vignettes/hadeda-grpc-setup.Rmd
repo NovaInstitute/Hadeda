@@ -151,12 +151,13 @@ If you see an error such as `google/protobuf/wrappers.proto:0:1: File not found`
 the Hedera bundle has been located correctly but the standard Google protobuf
 definitions are still missing from the import path. Installing `protoc` via
 Homebrew provides those headers under `file.path(system2("brew", c("--prefix",
-"protobuf"), stdout = TRUE), "include")`. Extend `proto_paths` with that
-directory and reload the services:
+"protobuf"), stdout = TRUE), "include")`. Instead of adding that path manually,
+call `hadeda_find_protobuf_include()` to detect system installations and extend
+`proto_paths` with the discovered directories before reloading the services:
 
 ```{r}
-google_proto_path <- file.path(system2("brew", c("--prefix", "protobuf"), stdout = TRUE), "include")
-proto_paths <- unique(c(proto_paths, google_proto_path))
+google_proto_paths <- hadeda_find_protobuf_include()
+proto_paths <- unique(c(proto_paths, google_proto_paths))
 
 crypto_stubs <- hadeda_read_services2(
   file.path(proto_root, "services", "crypto_service.proto"),
@@ -168,9 +169,9 @@ network_stubs <- hadeda_read_services2(
 )
 ```
 
-On other platforms, point `google_proto_path` to the directory that contains
-`google/protobuf` from your Protocol Buffers installation before rerunning the
-service loader.
+On other platforms, set the `PROTOBUF_INCLUDE` environment variable to the
+directory that contains `google/protobuf` before running the helper so that
+the search can locate the headers automatically.
 
 The `grpc::grpc_client()` helper turns those stubs into callables bound to a
 channel. The wrapper below returns a secure HTTP/2 channel connected to the

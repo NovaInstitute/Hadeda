@@ -8,27 +8,43 @@
 #' lookups.
 #'
 #' @param file Path to the `.proto` file that contains service declarations.
-#' @param package Package name passed to [RProtoBuf::readProtoFiles()]. Set to
-#'   `NULL` to suppress package lookup.
+#' @param package Package name passed to [RProtoBuf::readProtoFiles()]. Defaults
+#'   to `"RProtoBuf"` when omitted. Set to `NULL` to suppress package lookup.
 #' @param pattern File name pattern forwarded to
 #'   [RProtoBuf::readProtoFiles()]. When `NULL`, the default expression is used.
 #' @param lib.loc Library path vector forwarded to
-#'   [RProtoBuf::readProtoFiles()].
+#'   [RProtoBuf::readProtoFiles()]. Defaults to `NULL`.
 #' @param proto_path Character vector of additional import directories passed to
 #'   the `protoPath` argument of [RProtoBuf::readProtoFiles2()]. Files must live
 #'   inside one of these directories so that relative imports such as
-#'   `google/protobuf/wrappers.proto` can be resolved.
+#'   `google/protobuf/wrappers.proto` can be resolved. When supplied, the helper
+#'   automatically appends any directories discovered by
+#'   [hadeda_find_protobuf_include()].
 #'
 #' @return A named list describing the RPC stubs in the `.proto` definition.
 #'   The structure matches the output produced by `grpc::read_services()` so it
 #'   can be supplied directly to `grpc::grpc_client()`.
 #' @export
 hadeda_read_services2 <- function(file,
-                                  package = "RProtoBuf",
+                                  package,
                                   pattern = "\\.proto$",
-                                  lib.loc = NULL,
+                                  lib.loc,
                                   proto_path = NULL) {
   rlang::check_installed("RProtoBuf", reason = "for loading protobuf service definitions")
+
+  if (missing(package)) {
+    package <- "RProtoBuf"
+    package_supplied <- FALSE
+  } else {
+    package_supplied <- TRUE
+  }
+
+  if (missing(lib.loc)) {
+    lib.loc <- NULL
+    lib_loc_supplied <- FALSE
+  } else {
+    lib_loc_supplied <- TRUE
+  }
 
   file_path <- normalizePath(file, winslash = "/", mustWork = TRUE)
 
@@ -46,13 +62,14 @@ hadeda_read_services2 <- function(file,
 
     do.call(RProtoBuf::readProtoFiles, proto_args)
   } else {
-    if (!is.null(package) || !is.null(lib.loc)) {
+    if ((package_supplied && !is.null(package)) || (lib_loc_supplied && !is.null(lib.loc))) {
       cli::cli_abort(c(
         "x" = "`package` and `lib.loc` are not supported when `proto_path` is supplied.",
         "i" = "Pass search directories via `proto_path` and supply proto files relative to those roots."
       ))
     }
 
+    proto_path <- hadeda_merge_google_protos(proto_path)
     proto_roots <- normalizePath(proto_path, winslash = "/", mustWork = TRUE)
     file_relative <- hadeda_relativize_proto(file_path, proto_roots)
 
@@ -66,6 +83,11 @@ hadeda_read_services2 <- function(file,
 
   tokens <- hadeda_tokenise_proto(file_path)
   hadeda_parse_service_tokens(tokens)
+}
+
+hadeda_merge_google_protos <- function(proto_path) {
+  google_roots <- hadeda_find_protobuf_include()
+  unique(c(proto_path, google_roots))
 }
 
 hadeda_tokenise_proto <- function(file_path) {

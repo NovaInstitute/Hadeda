@@ -9,32 +9,28 @@ current working directory can be parsed without triggering the
 \code{RProtoBuf::readProtoFiles2()}.
 }
 \usage{
-hadeda_read_services2(
-  file,
-  package = "RProtoBuf",
-  pattern = "\\\\.proto$",
-  lib.loc = NULL,
-  proto_path = NULL
-)
+hadeda_read_services2(file, package, pattern = "\\\\.proto$", lib.loc, proto_path = NULL)
 }
 \arguments{
   \item{file}{Path to the \code{.proto} file that declares the services.}
   \item{package}{Optional package name forwarded to
-    \code{RProtoBuf::readProtoFiles()}. Set to \code{NULL} to skip package
-    lookup.}
+    \code{RProtoBuf::readProtoFiles()}. When omitted, the helper defaults to
+    \code{"RProtoBuf"}. Set to \code{NULL} to skip package lookup.}
   \item{pattern}{Filename pattern passed to
     \code{RProtoBuf::readProtoFiles()}. Use \code{NULL} to keep the default
     expression.}
   \item{lib.loc}{Library location vector handed to
-    \code{RProtoBuf::readProtoFiles()}.}
+    \code{RProtoBuf::readProtoFiles()}. Defaults to \code{NULL}.}
   \item{proto_path}{Character vector of additional import directories forwarded
     to the \code{protoPath} argument of \code{RProtoBuf::readProtoFiles2()}.
     Files must live under one of these directories so that relative imports such
-    as \code{google/protobuf/wrappers.proto} can be resolved.}
+    as \code{google/protobuf/wrappers.proto} can be resolved. When supplied, the
+    helper automatically appends any directories discovered by
+    \code{hadeda_find_protobuf_include()}.}
 }
 \value{
 A named list describing the RPC stubs defined in \code{file}. The structure
 mirrors the output of \code{grpc::read_services()} so that the result can be
 used directly with \code{grpc::grpc_client()}.
 }
-\seealso{\code{grpc::read_services()}, \code{RProtoBuf::readProtoFiles()}, \code{RProtoBuf::readProtoFiles2()}}
+\seealso{\code{grpc::read_services()}, \code{RProtoBuf::readProtoFiles()}, \code{RProtoBuf::readProtoFiles2()}, \code{hadeda_find_protobuf_include()}}
