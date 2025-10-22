@@ -10,12 +10,14 @@ test_that("hadeda_read_services2 parses proto definitions outside cwd", {
   }, add = TRUE)
 
   dir.create(file.path("nested", "services"), recursive = TRUE)
+  dir.create(file.path("nested", "includes"), recursive = TRUE)
 
   proto_path <- file.path("nested", "services", "example.proto")
   writeLines(
     c(
       "syntax = \"proto3\";",
       "package example;",
+      "import \"support.proto\";",
       "message PingRequest {}",
       "message PingReply {}",
       "service Demo {",
@@ -29,7 +31,18 @@ test_that("hadeda_read_services2 parses proto definitions outside cwd", {
     proto_path
   )
 
-  services <- hadeda_read_services2(proto_path)
+  writeLines(
+    c(
+      "syntax = \"proto3\";",
+      "package support;",
+      "message Placeholder {}"
+    ),
+    file.path("nested", "includes", "support.proto")
+  )
+
+  expect_error(hadeda_read_services2(proto_path))
+
+  services <- hadeda_read_services2(proto_path, proto_path = file.path("nested", "includes"))
 
   expect_setequal(names(services), c("Ping", "Stream", "Empty"))
   expect_equal(services$Ping$RequestType$proto, "example.PingRequest")
