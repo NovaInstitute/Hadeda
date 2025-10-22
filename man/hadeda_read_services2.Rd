@@ -5,7 +5,8 @@
 \description{
 Wraps \code{grpc::read_services()} so that \code{.proto} files located outside the
 current working directory can be parsed without triggering the
-\dQuote{none of the files exist} error from \code{RProtoBuf::readProtoFiles()}.
+\dQuote{none of the files exist} error from \code{RProtoBuf::readProtoFiles()} or
+\code{RProtoBuf::readProtoFiles2()}.
 }
 \usage{
 hadeda_read_services2(
@@ -27,13 +28,13 @@ hadeda_read_services2(
   \item{lib.loc}{Library location vector handed to
     \code{RProtoBuf::readProtoFiles()}.}
   \item{proto_path}{Character vector of additional import directories forwarded
-    to the \code{protoPath} argument of \code{RProtoBuf::readProtoFiles()}.
-    Supply this when your services reference protos located outside the
-    immediate bundle.}
+    to the \code{protoPath} argument of \code{RProtoBuf::readProtoFiles2()}.
+    Files must live under one of these directories so that relative imports such
+    as \code{google/protobuf/wrappers.proto} can be resolved.}
 }
 \value{
 A named list describing the RPC stubs defined in \code{file}. The structure
 mirrors the output of \code{grpc::read_services()} so that the result can be
 used directly with \code{grpc::grpc_client()}.
 }
-\seealso{\code{grpc::read_services()}, \code{RProtoBuf::readProtoFiles()}}
+\seealso{\code{grpc::read_services()}, \code{RProtoBuf::readProtoFiles()}, \code{RProtoBuf::readProtoFiles2()}}

@@ -2,9 +2,10 @@
 #'
 #' The helper wraps [`grpc::read_services()`][grpc::read_services] to work
 #' with `.proto` files located outside the current working directory. It reads
-#' the protobuf descriptors using [RProtoBuf::readProtoFiles()] with the fully
-#' qualified path before parsing the service declarations, which avoids the
-#' "none of the files exist" error triggered by relative lookups.
+#' the protobuf descriptors using [RProtoBuf::readProtoFiles()] or
+#' [RProtoBuf::readProtoFiles2()] before parsing the service declarations,
+#' which avoids the "none of the files exist" error triggered by relative
+#' lookups.
 #'
 #' @param file Path to the `.proto` file that contains service declarations.
 #' @param package Package name passed to [RProtoBuf::readProtoFiles()]. Set to
@@ -14,8 +15,9 @@
 #' @param lib.loc Library path vector forwarded to
 #'   [RProtoBuf::readProtoFiles()].
 #' @param proto_path Character vector of additional import directories passed to
-#'   the `protoPath` argument of [RProtoBuf::readProtoFiles()]. Use this when
-#'   your service definitions import protos located outside the bundle root.
+#'   the `protoPath` argument of [RProtoBuf::readProtoFiles2()]. Files must live
+#'   inside one of these directories so that relative imports such as
+#'   `google/protobuf/wrappers.proto` can be resolved.
 #'
 #' @return A named list describing the RPC stubs in the `.proto` definition.
 #'   The structure matches the output produced by `grpc::read_services()` so it
@@ -28,23 +30,39 @@ hadeda_read_services2 <- function(file,
                                   proto_path = NULL) {
   rlang::check_installed("RProtoBuf", reason = "for loading protobuf service definitions")
 
-  file_path <- normalizePath(file, mustWork = TRUE)
+  file_path <- normalizePath(file, winslash = "/", mustWork = TRUE)
 
-  proto_args <- list(files = file_path)
-  if (!is.null(package)) {
-    proto_args$package <- package
-  }
-  if (!is.null(pattern)) {
-    proto_args$pattern <- pattern
-  }
-  if (!is.null(lib.loc)) {
-    proto_args$lib.loc <- lib.loc
-  }
-  if (!is.null(proto_path)) {
-    proto_args$protoPath <- normalizePath(proto_path, mustWork = TRUE)
-  }
+  if (is.null(proto_path)) {
+    proto_args <- list(files = file_path)
+    if (!is.null(package)) {
+      proto_args$package <- package
+    }
+    if (!is.null(pattern)) {
+      proto_args$pattern <- pattern
+    }
+    if (!is.null(lib.loc)) {
+      proto_args$lib.loc <- lib.loc
+    }
 
-  do.call(RProtoBuf::readProtoFiles, proto_args)
+    do.call(RProtoBuf::readProtoFiles, proto_args)
+  } else {
+    if (!is.null(package) || !is.null(lib.loc)) {
+      cli::cli_abort(c(
+        "x" = "`package` and `lib.loc` are not supported when `proto_path` is supplied.",
+        "i" = "Pass search directories via `proto_path` and supply proto files relative to those roots."
+      ))
+    }
+
+    proto_roots <- normalizePath(proto_path, winslash = "/", mustWork = TRUE)
+    file_relative <- hadeda_relativize_proto(file_path, proto_roots)
+
+    proto_args <- list(files = file_relative, protoPath = proto_roots)
+    if (!is.null(pattern)) {
+      proto_args$pattern <- pattern
+    }
+
+    do.call(RProtoBuf::readProtoFiles2, proto_args)
+  }
 
   tokens <- hadeda_tokenise_proto(file_path)
   hadeda_parse_service_tokens(tokens)
@@ -164,4 +182,26 @@ hadeda_parse_service_tokens <- function(tokens) {
   }
 
   services
+}
+
+hadeda_relativize_proto <- function(file_path, proto_roots) {
+  if (!length(proto_roots)) {
+    cli::cli_abort("`proto_roots` must contain at least one directory.")
+  }
+
+  for (root in proto_roots) {
+    prefix <- paste0(root, "/")
+    if (identical(root, file_path)) {
+      return(basename(file_path))
+    }
+    if (startsWith(file_path, prefix)) {
+      relative <- substr(file_path, nchar(prefix) + 1L, nchar(file_path))
+      return(relative)
+    }
+  }
+
+  cli::cli_abort(c(
+    "x" = "File {file_path} is not located in any of the supplied proto search paths.",
+    "i" = "Add its parent directory to `proto_path`."
+  ))
 }
