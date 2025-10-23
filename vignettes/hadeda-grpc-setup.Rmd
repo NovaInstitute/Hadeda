@@ -174,13 +174,14 @@ directory that contains `google/protobuf` before running the helper so that
 the search can locate the headers automatically.
 
 The `grpc::grpc_client()` helper turns those stubs into callables bound to a
-channel. The wrapper below returns a secure HTTP/2 channel connected to the
-public Hedera testnet. When you are done with a channel, remember to destroy it
-with `grpc::grpc_channel_destroy()` so that native resources are released.
+channel. The `christiaanpauw/grpc` fork used by Hadeda manages the channel
+internally whenever you pass a target string, so the factory simply echoes the
+destination address. TLS options cannot be adjusted from R at the moment
+because the fork only exposes insecure channels.
 
 ```{r}
 channel_factory <- function(target = "testnet.hedera.com:50211") {
-  grpc::grpc_channel_create(target, opts = list("grpc.ssl_target_name_override" = "testnet.hedera.com"))
+  target
 }
 
 crypto_service <- function(channel) {
