@@ -53,10 +53,12 @@ exist on Windows via WSL, Chocolatey, or the official installers linked below.
    pak::pak(c("hadeda-r/hadeda", "openssl", "grpc", "jsonlite"))
    ```
 
-2. Confirm that `openssl::signature_create()` and `grpc::grpc_channel_create()`
-   run without error in an interactive R session. On Linux you may need to set
-   `LD_LIBRARY_PATH` if the OpenSSL runtime resides outside the standard search
-   paths.
+2. Confirm that `openssl::signature_create()` works and that
+   `grpc::grpc_client()` can be instantiated with a simple stub list. The
+   `christiaanpauw/grpc` fork used by Hadeda opens channels internally from the
+   target string, so no standalone `grpc_channel_create()` helper is available.
+   On Linux you may need to set `LD_LIBRARY_PATH` if the OpenSSL runtime resides
+   outside the standard search paths.
 
 ## 4. Fetch protobuf definitions
 

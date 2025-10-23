@@ -123,7 +123,14 @@ test_that("hadeda gRPC configuration can host channel factories", {
 
   handler <- list(
     channel = function(target = "localhost:50211", opts = list()) {
-      grpc::grpc_channel_create(target, opts = opts)
+      # christiaanpauw/grpc does not expose channel constructors. The client
+      # expects the raw target string and opens the channel internally.
+      if (!rlang::is_empty(opts)) {
+        cli::cli_warn(
+          "Channel options are ignored by the grpc client implementation."
+        )
+      }
+      target
     }
   )
 
