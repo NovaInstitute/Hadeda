@@ -92,7 +92,7 @@ hadeda_merge_google_protos <- function(proto_path) {
 
 hadeda_tokenise_proto <- function(file_path) {
   text <- paste(readLines(file_path, warn = FALSE), collapse = "\n")
-  text <- gsub("/\\*.*?\\*/", " ", text, perl = TRUE)
+  text <- gsub("(?s)/\\*.*?\\*/", " ", text, perl = TRUE)
   text <- gsub("//.*", "", text)
   pieces <- strsplit(text, "(?=[{}();])|\\s+", perl = TRUE)
   tokens <- unlist(pieces, use.names = FALSE)
