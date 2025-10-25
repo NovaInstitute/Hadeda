@@ -85,3 +85,33 @@ test_that("hadeda_read_services2 ignores multiline block comments", {
   expect_named(services, "Ping")
   expect_match(services$Ping$name, "/demo.CommentDemo/Ping")
 })
+
+test_that("hadeda_tokenise_proto keeps service definitions with line comments", {
+  tmp <- tempfile("hadeda-proto-line")
+  dir.create(tmp)
+  on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
+
+  proto_path <- file.path(tmp, "line-comment.proto")
+  writeLines(
+    c(
+      "syntax = \"proto3\";",
+      "package example;",
+      "",
+      "// comment mentioning https://example.com should not remove services",
+      "service ExampleService {",
+      "  // inline comment preceding RPC",
+      "  rpc Demo (Ping) returns (Pong);",
+      "}",
+      "",
+      "message Ping {}",
+      "message Pong {}"
+    ),
+    proto_path
+  )
+
+  tokens <- hadeda:::hadeda_tokenise_proto(proto_path)
+  services <- hadeda:::hadeda_parse_service_tokens(tokens)
+
+  expect_named(services, "Demo")
+  expect_match(services$Demo$name, "/example.ExampleService/Demo")
+})
