@@ -129,6 +129,7 @@ hadeda_parse_service_tokens <- function(tokens) {
   pkg <- ""
   cursor <- 1L
   services <- list()
+  rpc_registry <- list()
 
   qualify <- function(name) {
     if (!nzchar(pkg) || grepl("\\.", name, fixed = TRUE)) {
@@ -270,7 +271,23 @@ hadeda_parse_service_tokens <- function(tokens) {
           response_type,
           response_stream
         )
-        services[[rpc_name]] <- list(
+        stub_name <- rpc_name
+        prior_services <- rpc_registry[[rpc_name]]
+        if (is.null(prior_services)) {
+          rpc_registry[[rpc_name]] <- service_name
+        } else {
+          if (length(prior_services) == 1L) {
+            existing_service <- prior_services[[1]]
+            existing_key <- paste(existing_service, rpc_name, sep = ".")
+            existing_index <- match(rpc_name, names(services))
+            if (!is.na(existing_index)) {
+              names(services)[existing_index] <- existing_key
+            }
+          }
+          stub_name <- paste(service_name, rpc_name, sep = ".")
+          rpc_registry[[rpc_name]] <- c(prior_services, service_name)
+        }
+        services[[stub_name]] <- list(
           f = I,
           RequestType = list(
             name = request_type,
