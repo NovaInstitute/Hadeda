@@ -116,7 +116,7 @@ hadeda_tokenise_proto <- function(file_path) {
   text <- paste(readLines(file_path, warn = FALSE), collapse = "\n")
   hadeda_debug("Proto text length before stripping comments: %d characters", nchar(text))
   text <- gsub("(?s)/\\*.*?\\*/", " ", text, perl = TRUE)
-  text <- gsub("//.*", "", text)
+  text <- gsub("(?m)//.*$", "", text, perl = TRUE)
   hadeda_debug("Proto text length after stripping comments: %d characters", nchar(text))
   pieces <- strsplit(text, "(?=[{}();])|\\s+", perl = TRUE)
   tokens <- unlist(pieces, use.names = FALSE)
