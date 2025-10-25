@@ -32,6 +32,8 @@ hadeda_read_services2 <- function(file,
                                   proto_path = NULL) {
   rlang::check_installed("RProtoBuf", reason = "for loading protobuf service definitions")
 
+  hadeda_debug("Preparing to read proto services from: %s", file)
+
   if (missing(package)) {
     package <- "RProtoBuf"
     package_supplied <- FALSE
@@ -47,6 +49,7 @@ hadeda_read_services2 <- function(file,
   }
 
   file_path <- normalizePath(file, winslash = "/", mustWork = TRUE)
+  hadeda_debug("Normalised proto file path: %s", file_path)
 
   if (is.null(proto_path)) {
     proto_args <- list(files = file_path)
@@ -60,6 +63,7 @@ hadeda_read_services2 <- function(file,
       proto_args$lib.loc <- lib.loc
     }
 
+    hadeda_debug_list("Calling RProtoBuf::readProtoFiles with arguments:", proto_args)
     do.call(RProtoBuf::readProtoFiles, proto_args)
   } else {
     if ((package_supplied && !is.null(package)) || (lib_loc_supplied && !is.null(lib.loc))) {
@@ -69,33 +73,54 @@ hadeda_read_services2 <- function(file,
       ))
     }
 
+    hadeda_debug("Proto search paths requested: %s", paste(proto_path, collapse = ", "))
     proto_path <- hadeda_merge_google_protos(proto_path)
+    hadeda_debug("Proto search paths after merging google includes: %s", paste(proto_path, collapse = ", "))
     proto_roots <- normalizePath(proto_path, winslash = "/", mustWork = TRUE)
+    hadeda_debug("Normalised proto search roots: %s", paste(proto_roots, collapse = ", "))
     file_relative <- hadeda_relativize_proto(file_path, proto_roots)
+    hadeda_debug("Relative proto filename: %s", file_relative)
 
     proto_args <- list(files = file_relative, protoPath = proto_roots)
     if (!is.null(pattern)) {
       proto_args$pattern <- pattern
     }
 
+    hadeda_debug_list("Calling RProtoBuf::readProtoFiles2 with arguments:", proto_args)
     do.call(RProtoBuf::readProtoFiles2, proto_args)
   }
 
+  hadeda_debug("Tokenising proto definition: %s", file_path)
   tokens <- hadeda_tokenise_proto(file_path)
-  hadeda_parse_service_tokens(tokens)
+  hadeda_debug("Extracted %d tokens from %s", length(tokens), file_path)
+  services <- hadeda_parse_service_tokens(tokens)
+  hadeda_debug("Parsed %d RPC stubs from %s", length(services), file_path)
+  services
 }
 
 hadeda_merge_google_protos <- function(proto_path) {
+  hadeda_debug("Locating google protobuf include directories")
   google_roots <- hadeda_find_protobuf_include()
-  unique(c(proto_path, google_roots))
+  if (length(google_roots)) {
+    hadeda_debug("Discovered google includes: %s", paste(google_roots, collapse = ", "))
+  } else {
+    hadeda_debug("No google protobuf includes found")
+  }
+  merged <- unique(c(proto_path, google_roots))
+  hadeda_debug("Merged proto search paths: %s", paste(merged, collapse = ", "))
+  merged
 }
 
 hadeda_tokenise_proto <- function(file_path) {
+  hadeda_debug("Reading proto file for tokenisation: %s", file_path)
   text <- paste(readLines(file_path, warn = FALSE), collapse = "\n")
+  hadeda_debug("Proto text length before stripping comments: %d characters", nchar(text))
   text <- gsub("(?s)/\\*.*?\\*/", " ", text, perl = TRUE)
   text <- gsub("//.*", "", text)
+  hadeda_debug("Proto text length after stripping comments: %d characters", nchar(text))
   pieces <- strsplit(text, "(?=[{}();])|\\s+", perl = TRUE)
   tokens <- unlist(pieces, use.names = FALSE)
+  hadeda_debug("Tokenised into %d raw tokens", length(tokens))
   tokens[nzchar(tokens)]
 }
 
@@ -129,6 +154,7 @@ hadeda_parse_service_tokens <- function(tokens) {
 
     if (identical(token, "service") && cursor < length(tokens)) {
       service_name <- tokens[cursor + 1L]
+      hadeda_debug("Found service declaration: %s", service_name)
       cursor <- cursor + 2L
       advance_until("{")
       cursor <- cursor + 1L
@@ -140,6 +166,7 @@ hadeda_parse_service_tokens <- function(tokens) {
         }
 
         rpc_name <- tokens[cursor + 1L]
+        hadeda_debug("Parsing RPC: %s.%s", service_name, rpc_name)
         cursor <- cursor + 2L
 
         advance_until("(")
@@ -183,6 +210,20 @@ hadeda_parse_service_tokens <- function(tokens) {
           cursor <- cursor + 1L
         }
 
+        hadeda_debug(
+          paste(
+            "Registered RPC stub:",
+            "name = %s",
+            "request = %s (stream = %s)",
+            "response = %s (stream = %s)",
+            sep = "\n"
+          ),
+          sprintf("/%s%s/%s", if (nzchar(pkg)) paste0(pkg, ".") else "", service_name, rpc_name),
+          request_type,
+          request_stream,
+          response_type,
+          response_stream
+        )
         services[[rpc_name]] <- list(
           f = I,
           RequestType = list(
@@ -212,16 +253,20 @@ hadeda_relativize_proto <- function(file_path, proto_roots) {
   }
 
   for (root in proto_roots) {
+    hadeda_debug("Checking if %s is within proto root %s", file_path, root)
     prefix <- paste0(root, "/")
     if (identical(root, file_path)) {
+      hadeda_debug("Proto file matches root exactly; using basename")
       return(basename(file_path))
     }
     if (startsWith(file_path, prefix)) {
       relative <- substr(file_path, nchar(prefix) + 1L, nchar(file_path))
+      hadeda_debug("Proto file is within root %s; relative path %s", root, relative)
       return(relative)
     }
   }
 
+  hadeda_debug("Failed to relativize %s against proto roots: %s", file_path, paste(proto_roots, collapse = ", "))
   cli::cli_abort(c(
     "x" = "File {file_path} is not located in any of the supplied proto search paths.",
     "i" = "Add its parent directory to `proto_path`."
