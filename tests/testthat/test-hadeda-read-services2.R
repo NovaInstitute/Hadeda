@@ -115,3 +115,33 @@ test_that("hadeda_tokenise_proto keeps service definitions with line comments", 
   expect_named(services, "Demo")
   expect_match(services$Demo$name, "/example.ExampleService/Demo")
 })
+
+test_that("hadeda_parse_service_tokens disambiguates duplicate RPC names", {
+  tmp <- tempfile("hadeda-proto-duplicate")
+  dir.create(tmp)
+  on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
+
+  proto_path <- file.path(tmp, "duplicate.proto")
+  writeLines(
+    c(
+      "syntax = \"proto3\";",
+      "package example;",
+      "service Alpha {",
+      "  rpc Demo (Ping) returns (Pong);",
+      "}",
+      "service Beta {",
+      "  rpc Demo (Ping) returns (Pong);",
+      "}",
+      "message Ping {}",
+      "message Pong {}"
+    ),
+    proto_path
+  )
+
+  tokens <- hadeda:::hadeda_tokenise_proto(proto_path)
+  services <- hadeda:::hadeda_parse_service_tokens(tokens)
+
+  expect_setequal(names(services), c("Alpha.Demo", "Beta.Demo"))
+  expect_match(services$`Alpha.Demo`$name, "/example.Alpha/Demo")
+  expect_match(services$`Beta.Demo`$name, "/example.Beta/Demo")
+})
