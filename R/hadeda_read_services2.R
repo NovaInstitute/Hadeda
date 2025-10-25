@@ -93,6 +93,7 @@ hadeda_read_services2 <- function(file,
   hadeda_debug("Tokenising proto definition: %s", file_path)
   tokens <- hadeda_tokenise_proto(file_path)
   hadeda_debug("Extracted %d tokens from %s", length(tokens), file_path)
+  hadeda_debug_list("Token stream passed to service parser:", tokens)
   services <- hadeda_parse_service_tokens(tokens)
   hadeda_debug("Parsed %d RPC stubs from %s", length(services), file_path)
   services
@@ -138,16 +139,35 @@ hadeda_parse_service_tokens <- function(tokens) {
   }
 
   advance_until <- function(target) {
+    hadeda_debug(
+      "Seeking token '%s' from position %d (current token: %s)",
+      target,
+      cursor,
+      if (cursor <= length(tokens)) tokens[cursor] else "<end>"
+    )
     while (cursor <= length(tokens) && tokens[cursor] != target) {
       cursor <<- cursor + 1L
     }
+    hadeda_debug(
+      "Stopped at position %d while searching for '%s' (found: %s)",
+      cursor,
+      target,
+      if (cursor <= length(tokens)) tokens[cursor] else "<end>"
+    )
   }
 
   while (cursor <= length(tokens)) {
     token <- tokens[cursor]
+    hadeda_debug(
+      "Inspecting token %d/%d: %s",
+      cursor,
+      length(tokens),
+      token
+    )
 
     if (identical(token, "package") && cursor < length(tokens)) {
       pkg <- tokens[cursor + 1L]
+      hadeda_debug("Detected package declaration: %s", pkg)
       cursor <- cursor + 2L
       next
     }
@@ -160,6 +180,12 @@ hadeda_parse_service_tokens <- function(tokens) {
       cursor <- cursor + 1L
 
       while (cursor <= length(tokens) && !identical(tokens[cursor], "}")) {
+        hadeda_debug(
+          "Scanning for RPC definitions inside service %s at position %d (token: %s)",
+          service_name,
+          cursor,
+          if (cursor <= length(tokens)) tokens[cursor] else "<end>"
+        )
         if (!identical(tokens[cursor], "rpc") || cursor >= length(tokens)) {
           cursor <- cursor + 1L
           next
@@ -177,6 +203,13 @@ hadeda_parse_service_tokens <- function(tokens) {
           cursor <- cursor + 1L
         }
         request_type <- tokens[cursor]
+        hadeda_debug(
+          "Captured request type for %s.%s: %s (stream = %s)",
+          service_name,
+          rpc_name,
+          request_type,
+          request_stream
+        )
         advance_until(")")
         cursor <- cursor + 1L
 
@@ -188,6 +221,13 @@ hadeda_parse_service_tokens <- function(tokens) {
           cursor <- cursor + 1L
         }
         response_type <- tokens[cursor]
+        hadeda_debug(
+          "Captured response type for %s.%s: %s (stream = %s)",
+          service_name,
+          rpc_name,
+          response_type,
+          response_stream
+        )
         advance_until(")")
         cursor <- cursor + 1L
 
@@ -206,6 +246,12 @@ hadeda_parse_service_tokens <- function(tokens) {
             }
             cursor <- cursor + 1L
           }
+          hadeda_debug(
+            "Skipped RPC options block for %s.%s; resumed at position %d",
+            service_name,
+            rpc_name,
+            cursor
+          )
         } else if (cursor <= length(tokens) && identical(tokens[cursor], ";")) {
           cursor <- cursor + 1L
         }
