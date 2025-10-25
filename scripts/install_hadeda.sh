@@ -49,7 +49,11 @@ ensure_pkg_config() {
 }
 
 ensure_grpc_native() {
-  if pkg-config --exists grpc grpc++; then
+  have_grpc() {
+    pkg-config --exists grpc >/dev/null 2>&1
+  }
+
+  if have_grpc; then
     log "gRPC development libraries detected via pkg-config"
     return
   fi
@@ -65,7 +69,7 @@ ensure_grpc_native() {
     die "gRPC development libraries not found and automatic installation is unsupported on this platform; install gRPC (including pkg-config metadata) and retry."
   fi
 
-  if ! pkg-config --exists grpc grpc++; then
+  if ! have_grpc; then
     die "pkg-config still cannot find gRPC after installation; check that grpc.pc is on PKG_CONFIG_PATH."
   fi
 }
@@ -157,6 +161,7 @@ ensure_grpc_native
 
 export RENV_PATHS_LIBRARY="$project_root/renv/library"
 export RENV_CONFIG_INSTALL_OVERWRITE=TRUE
+export RENV_PROJECT="$project_root"
 
 log "Restoring R package dependencies with renv and ensuring gRPC package is available"
 R --vanilla <<'RS'
@@ -192,7 +197,35 @@ if (!requireNamespace("grpc", quietly = TRUE)) {
     }
   )
 }
+
+vignette_deps <- c("knitr", "rmarkdown")
+missing_vignette <- vignette_deps[vapply(vignette_deps, function(pkg) {
+  !requireNamespace(pkg, quietly = TRUE)
+}, logical(1))]
+if (length(missing_vignette)) {
+  renv::install(missing_vignette)
+}
 RS
+
+libdir="$(R --vanilla <<'RS'
+Sys.setenv(RENV_PATHS_LIBRARY = Sys.getenv("RENV_PATHS_LIBRARY"))
+if (!requireNamespace("renv", quietly = TRUE)) {
+  quit(status = 1)
+}
+renv::load(project = Sys.getenv("RENV_PROJECT", unset = getwd()))
+cat(renv::paths$library())
+RS
+)"
+libdir="${libdir//$'\r'/}"
+libdir="${libdir//$'\n'/}"
+if [[ -n "$libdir" ]]; then
+  mkdir -p "$libdir"
+  if [[ -n "${R_LIBS_USER:-}" ]]; then
+    export R_LIBS_USER="$libdir:$R_LIBS_USER"
+  else
+    export R_LIBS_USER="$libdir"
+  fi
+fi
 
 log "Building hadeda package"
 R CMD build "$project_root"
