@@ -19,6 +19,7 @@ hadeda_debug <- function(message, ...) {
     message
   }
 
+  formatted <- hadeda_escape_cli_braces(formatted)
   cli::cli_inform(c("debug" = formatted))
   invisible(NULL)
 }
@@ -30,4 +31,9 @@ hadeda_debug_list <- function(title, values) {
 
   summary <- paste(utils::capture.output(str(values)), collapse = "\n")
   hadeda_debug("%s\n%s", title, summary)
+}
+
+hadeda_escape_cli_braces <- function(text) {
+  text <- gsub("}", "}}", text, fixed = TRUE)
+  gsub("{", "{{", text, fixed = TRUE)
 }
