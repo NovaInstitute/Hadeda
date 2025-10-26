@@ -21,10 +21,8 @@ test_that("hadeda_grpc_env_credentials reads operator env vars", {
 
   creds <- hadeda_grpc_env_credentials()
   expect_equal(creds$operator_account_id, "0.0.1234")
-  expect_equal(
-    creds$operator_private_key,
-    "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----\n"
-  )
+  expect_match(creds$operator_private_key, "BEGIN PRIVATE KEY")
+  expect_match(creds$operator_private_key, "END PRIVATE KEY")
 })
 
 test_that("hadeda_grpc_env_credentials validates account identifiers", {
@@ -78,6 +76,37 @@ test_that("hadeda_grpc_env_credentials requires a private key", {
   )
 })
 
+test_that("hadeda_grpc_env_credentials converts hex operator keys", {
+  testthat::skip_if_not_installed("openssl")
+
+  key <- openssl::ed25519_keygen()
+  der <- openssl::write_der(key)
+  hex <- paste(sprintf("%02x", as.integer(der)), collapse = "")
+
+  old_id <- Sys.getenv("HADEDA_OPERATOR_ID", unset = NA)
+  old_key <- Sys.getenv("HADEDA_OPERATOR_KEY", unset = NA)
+  on.exit({
+    if (is.na(old_id)) {
+      Sys.unsetenv("HADEDA_OPERATOR_ID")
+    } else {
+      Sys.setenv(HADEDA_OPERATOR_ID = old_id)
+    }
+    if (is.na(old_key)) {
+      Sys.unsetenv("HADEDA_OPERATOR_KEY")
+    } else {
+      Sys.setenv(HADEDA_OPERATOR_KEY = old_key)
+    }
+  })
+
+  Sys.setenv(HADEDA_OPERATOR_ID = "0.0.9876", HADEDA_OPERATOR_KEY = hex)
+  creds <- hadeda_grpc_env_credentials()
+
+  expect_match(creds$operator_private_key, "BEGIN PRIVATE KEY")
+  parsed <- openssl::read_key(creds$operator_private_key)
+  expect_s3_class(parsed, "key")
+  expect_identical(parsed$data, key$data)
+})
+
 test_that("hadeda_grpc_ed25519_signer signs payloads", {
   testthat::skip_if_not_installed("openssl")
 
@@ -95,6 +124,22 @@ test_that("hadeda_grpc_ed25519_signer signs payloads", {
   pub <- hadeda_grpc_signer_public_key(signer)
   expect_type(pub, "raw")
   expect_length(pub, 32L)
+})
+
+test_that("hadeda_grpc_ed25519_signer accepts hex input", {
+  testthat::skip_if_not_installed("openssl")
+
+  key <- openssl::ed25519_keygen()
+  der <- openssl::write_der(key)
+  hex <- paste(sprintf("%02x", as.integer(der)), collapse = "")
+
+  signer <- hadeda_grpc_ed25519_signer(hex)
+  payload <- charToRaw("hex support")
+  signature <- signer(payload)
+
+  expect_type(signature, "raw")
+  expect_length(signature, 64L)
+  expect_identical(attr(signer, "private_key", exact = TRUE), key$data)
 })
 
 test_that("hadeda_grpc_ed25519_signer exposes private key bytes", {

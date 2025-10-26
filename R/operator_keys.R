@@ -140,11 +140,7 @@ hadeda_write_operator_key <- function(private_key,
                                       passphrase = NULL) {
   rlang::check_installed("openssl", reason = "for Ed25519 key conversion support")
 
-  if (!is.character(private_key) || length(private_key) != 1L) {
-    cli::cli_abort("`private_key` must be a character scalar.")
-  }
-
-  pem <- hadeda_normalise_operator_key(private_key)
+  pem <- hadeda_resolve_operator_key(private_key)
   destination <- path.expand(path)
 
   dir.create(dirname(destination), recursive = TRUE, showWarnings = FALSE)
@@ -202,4 +198,28 @@ hadeda_normalise_operator_key <- function(key_text) {
   }
 
   hadeda_operator_key_from_hex(trimmed)
+}
+
+hadeda_resolve_operator_key <- function(private_key) {
+  if (!is.character(private_key) || length(private_key) != 1L) {
+    cli::cli_abort("`private_key` must be a character scalar.")
+  }
+
+  candidate <- private_key
+  if (file.exists(private_key)) {
+    file_size <- file.info(private_key)$size
+    if (is.na(file_size) || file_size <= 0) {
+      cli::cli_abort(
+        c(
+          "Operator key file is empty",
+          "x" = private_key,
+          "i" = "Write the PEM contents to the file or supply the key directly."
+        )
+      )
+    }
+
+    candidate <- readChar(private_key, file_size, useBytes = TRUE)
+  }
+
+  hadeda_normalise_operator_key(candidate)
 }
