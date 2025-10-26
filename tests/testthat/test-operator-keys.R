@@ -42,8 +42,12 @@ test_that("hadeda_write_operator_key refuses to overwrite by default", {
   on.exit(Sys.setenv(HADEDA_OPERATOR_KEY = old), add = TRUE)
 
   invisible(hadeda_write_operator_key(hex_key, path = tmpfile, set_env = FALSE, overwrite = TRUE))
-  expect_error(
-    hadeda_write_operator_key(hex_key, path = tmpfile, set_env = FALSE),
+  original <- readChar(tmpfile, file.info(tmpfile)$size)
+
+  expect_warning(
+    invisible(hadeda_write_operator_key(hex_key, path = tmpfile, set_env = FALSE)),
     "Destination already exists"
   )
+
+  expect_equal(readChar(tmpfile, file.info(tmpfile)$size), original)
 })

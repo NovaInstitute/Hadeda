@@ -150,13 +150,15 @@ hadeda_write_operator_key <- function(private_key,
   dir.create(dirname(destination), recursive = TRUE, showWarnings = FALSE)
 
   if (file.exists(destination) && !isTRUE(overwrite)) {
-    cli::cli_abort(
+    cli::cli_warn(
       c(
         "Destination already exists",
         "x" = destination,
         "i" = "Pass `overwrite = TRUE` to replace the existing PEM file."
       )
     )
+
+    return(invisible(destination))
   }
 
   key <- tryCatch(
