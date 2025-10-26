@@ -45,7 +45,7 @@ hadeda_grpc_env_credentials <- function(
 
   list(
     operator_account_id = account_id,
-    operator_private_key = private_key
+    operator_private_key = hadeda_resolve_operator_key(private_key)
   )
 }
 
@@ -82,11 +82,7 @@ hadeda_grpc_ed25519_signer <- function(
     )
   }
 
-  pem_text <- if (file.exists(private_key_pem)) {
-    readChar(private_key_pem, file.info(private_key_pem)$size)
-  } else {
-    private_key_pem
-  }
+  pem_text <- hadeda_resolve_operator_key(private_key_pem)
 
   key <- tryCatch(
     openssl::read_key(pem_text, password = passphrase),
