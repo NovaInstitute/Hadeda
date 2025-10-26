@@ -24,7 +24,9 @@ test_that("hadeda_write_operator_key persists PEM and updates environment", {
   old <- Sys.getenv("HADEDA_OPERATOR_KEY")
   on.exit(Sys.setenv(HADEDA_OPERATOR_KEY = old), add = TRUE)
 
-  invisible(hadeda_write_operator_key(hex_key, path = dest, set_env = TRUE, overwrite = TRUE))
+  result <- hadeda_write_operator_key(hex_key, path = dest, set_env = TRUE, overwrite = TRUE)
+
+  expect_equal(result, dest)
 
   expect_equal(Sys.getenv("HADEDA_OPERATOR_KEY"), dest)
   expect_true(file.exists(dest))
@@ -41,13 +43,16 @@ test_that("hadeda_write_operator_key refuses to overwrite by default", {
   old <- Sys.getenv("HADEDA_OPERATOR_KEY")
   on.exit(Sys.setenv(HADEDA_OPERATOR_KEY = old), add = TRUE)
 
-  invisible(hadeda_write_operator_key(hex_key, path = tmpfile, set_env = FALSE, overwrite = TRUE))
+  result <- hadeda_write_operator_key(hex_key, path = tmpfile, set_env = FALSE, overwrite = TRUE)
+  expect_equal(result, tmpfile)
   original <- readChar(tmpfile, file.info(tmpfile)$size)
 
   expect_warning(
-    invisible(hadeda_write_operator_key(hex_key, path = tmpfile, set_env = FALSE)),
+    duplicate <- hadeda_write_operator_key(hex_key, path = tmpfile, set_env = FALSE),
     "Destination already exists"
   )
+
+  expect_equal(duplicate, tmpfile)
 
   expect_equal(readChar(tmpfile, file.info(tmpfile)$size), original)
 })

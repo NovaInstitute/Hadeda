@@ -123,7 +123,7 @@ hadeda_operator_key_path <- function(config_home = NULL, filename = "operator_ed
 #'   written file path.
 #' @param passphrase Optional passphrase used to encrypt the PEM file on disk.
 #'
-#' @return The path to the written PEM file (invisibly).
+#' @return The path to the written PEM file.
 #'
 #' @examples
 #' \dontrun{
@@ -158,7 +158,7 @@ hadeda_write_operator_key <- function(private_key,
       )
     )
 
-    return(invisible(destination))
+    return(destination)
   }
 
   key <- tryCatch(
@@ -188,7 +188,7 @@ hadeda_write_operator_key <- function(private_key,
     Sys.setenv(HADEDA_OPERATOR_KEY = destination)
   }
 
-  invisible(destination)
+  destination
 }
 
 hadeda_normalise_operator_key <- function(key_text) {

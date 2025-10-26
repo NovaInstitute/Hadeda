@@ -27,7 +27,7 @@ written file path.}
 \item{passphrase}{Optional passphrase used to encrypt the PEM file on disk.}
 }
 \value{
-The path to the written PEM file (invisibly).
+The path to the written PEM file.
 }
 \description{
 This helper accepts a PEM string or DER hex representation of an Ed25519
