@@ -441,8 +441,8 @@ Now calling `crypto_account_info()` uses the custom handler to perform a gRPC
 query end-to-end.
 
 ```{r}
-info <- crypto_get_account_info(config = grpc_config, account_id = operator$operator_account_id)
-t6info
+info <- crypto_account_info(config = grpc_config, account_id = operator$operator_account_id)
+info
 ```
 
 The returned tibble matches the schema from Hadeda's REST implementation but is
