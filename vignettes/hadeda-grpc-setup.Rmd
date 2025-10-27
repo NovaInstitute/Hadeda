@@ -306,7 +306,7 @@ crypto_cost_query <- function(account_id, channel = NULL) {
 
   client <- crypto_service(channel)
   cost_query <- query_wrapper(
-    cryptogetaccountinfo = crypto_get_account_info(
+    cryptoGetAccountInfo = crypto_get_account_info(
       header = query_header(responseType = "COST_ANSWER"),
       accountID = to_account_id(account_id)
     )
@@ -398,11 +398,11 @@ query_account_info <- function(config, account_id) {
   }
 
   cost_response <- crypto_cost_query(account_id, channel)
-  cost <- cost_response$cryptogetaccountinfo$responseHeader$cost
+  cost <- cost_response$cryptoGetAccountInfo$responseHeader$cost
   payment <- build_payment(config$grpc$operator, account_id, cost)
 
   query_message <- query_wrapper(
-    cryptogetaccountinfo = crypto_get_account_info(
+    cryptoGetAccountInfo = crypto_get_account_info(
       header = query_header(
         responseType = "ANSWER_ONLY",
         payment = transaction(signedTransactionBytes = payment)
@@ -441,7 +441,7 @@ Now calling `crypto_account_info()` uses the custom handler to perform a gRPC
 query end-to-end.
 
 ```{r}
-info <- crypto_get_account_info(config = grpc_config, account_id = operator$operator_account_id)
+info <- crypto_account_info(config = grpc_config, account_id = operator$operator_account_id)
 t6info
 ```
 
