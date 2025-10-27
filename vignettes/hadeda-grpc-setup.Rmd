@@ -251,9 +251,8 @@ encoded private key. If your operator secret is provided as a hexadecimal DER
 string, Hadeda can convert and store it for you:
 
 ```{r eval=FALSE}
-hadeda_write_operator_key(
-  "302e020100300506032b657004220420e638e087c0dfe201b3519bd442033eba27b961a5fc969a7f4911b13ea2315769"
-)
+HOK <- Sys.getenv("HADEDA_OPERATOR_KEY")
+fp <- hadeda_write_operator_key(HOK)
 ```
 
 The helper writes the key to `hadeda_operator_key_path()` (for example
@@ -262,7 +261,7 @@ that subsequent calls see the PEM file automatically.
 
 ```{r}
 operator <- hadeda_grpc_env_credentials()
-sign_transaction <- hadeda_grpc_ed25519_signer()
+sign_transaction <- hadeda_grpc_ed25519_signer(fp)
 operator$public_key <- hadeda_grpc_signer_public_key(sign_transaction)
 ```
 
@@ -442,8 +441,8 @@ Now calling `crypto_account_info()` uses the custom handler to perform a gRPC
 query end-to-end.
 
 ```{r}
-info <- crypto_account_info(grpc_config, operator$operator_account_id)
-info
+info <- crypto_get_account_info(config = grpc_config, account_id = operator$operator_account_id)
+t6info
 ```
 
 The returned tibble matches the schema from Hadeda's REST implementation but is
