@@ -306,7 +306,7 @@ crypto_cost_query <- function(account_id, channel = NULL) {
 
   client <- crypto_service(channel)
   cost_query <- query_wrapper(
-    cryptogetinfo = crypto_get_account_info(
+    cryptogetaccountinfo = crypto_get_account_info(
       header = query_header(responseType = "COST_ANSWER"),
       accountID = to_account_id(account_id)
     )
@@ -402,7 +402,7 @@ query_account_info <- function(config, account_id) {
   payment <- build_payment(config$grpc$operator, account_id, cost)
 
   query_message <- query_wrapper(
-    cryptogetinfo = crypto_get_account_info(
+    cryptogetaccountinfo = crypto_get_account_info(
       header = query_header(
         responseType = "ANSWER_ONLY",
         payment = transaction(signedTransactionBytes = payment)
