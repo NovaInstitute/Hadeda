@@ -212,14 +212,29 @@ proto_message <- function(type) {
   }
 }
 
+query_header <- proto_message("proto.QueryHeader")
+account_id_message <- proto_message("proto.AccountID")
+timestamp_message <- proto_message("proto.Timestamp")
+duration_message <- proto_message("proto.Duration")
+transaction_id_message <- proto_message("proto.TransactionID")
+transfer_list_message <- proto_message("proto.TransferList")
+account_amount_message <- proto_message("proto.AccountAmount")
+crypto_transfer_message <- proto_message("proto.CryptoTransferTransactionBody")
+signature_map_message <- proto_message("proto.SignatureMap")
+signature_pair_message <- proto_message("proto.SignaturePair")
+
 to_account_id <- function(id) {
   parts <- as.integer(strsplit(id, "\\.")[[1]])
-  list(shardNum = parts[1], realmNum = parts[2], accountNum = parts[3])
+  account_id_message(
+    shardNum = parts[1],
+    realmNum = parts[2],
+    accountNum = parts[3]
+  )
 }
 
 now_timestamp <- function() {
   instant <- as.integer(as.numeric(Sys.time()))
-  list(seconds = instant, nanos = 0L)
+  timestamp_message(seconds = instant, nanos = 0L)
 }
 
 crypto_get_account_info <- proto_message("proto.CryptoGetInfoQuery")
@@ -273,16 +288,27 @@ Hadeda's gRPC expectations.
 crypto_cost_query <- function(account_id, channel = NULL) {
   if (is.null(channel)) {
     channel <- channel_factory()
-    on.exit(grpc::grpc_channel_destroy(channel), add = TRUE)
+    destroy_channel <- get0(
+      "grpc_channel_destroy",
+      envir = asNamespace("grpc"),
+      inherits = FALSE
+    )
+    if (is.null(destroy_channel)) {
+      destroy_channel <- get0(
+        "channel_destroy",
+        envir = asNamespace("grpc"),
+        inherits = FALSE
+      )
+    }
+    if (!is.null(destroy_channel) && inherits(channel, "grpc_channel")) {
+      on.exit(destroy_channel(channel), add = TRUE)
+    }
   }
 
   client <- crypto_service(channel)
   cost_query <- query_wrapper(
     cryptogetinfo = crypto_get_account_info(
-      header = list(
-        responseType = "COST_ANSWER",
-        payment = list()
-      ),
+      header = query_header(responseType = "COST_ANSWER"),
       accountID = to_account_id(account_id)
     )
   )
@@ -308,18 +334,24 @@ transaction <- proto_message("proto.Transaction")
 build_payment <- function(operator, account_id, cost, valid_duration = 120L) {
   pub_key <- hadeda_grpc_signer_public_key(sign_transaction)
   body <- transaction_body(
-    transactionID = list(
+    transactionID = transaction_id_message(
       accountID = to_account_id(operator$operator_account_id),
       transactionValidStart = now_timestamp()
     ),
     nodeAccountID = to_account_id("0.0.3"),
     transactionFee = cost,
-    transactionValidDuration = list(seconds = as.integer(valid_duration)),
-    cryptoTransfer = list(
-      transfers = list(
+    transactionValidDuration = duration_message(seconds = as.integer(valid_duration)),
+    cryptoTransfer = crypto_transfer_message(
+      transfers = transfer_list_message(
         accountAmounts = list(
-          list(accountID = to_account_id(operator$operator_account_id), amount = -cost),
-          list(accountID = to_account_id("0.0.3"), amount = cost)
+          account_amount_message(
+            accountID = to_account_id(operator$operator_account_id),
+            amount = -cost
+          ),
+          account_amount_message(
+            accountID = to_account_id("0.0.3"),
+            amount = cost
+          )
         )
       )
     )
@@ -327,9 +359,9 @@ build_payment <- function(operator, account_id, cost, valid_duration = 120L) {
 
   body_bytes <- RProtoBuf::serialize(body, NULL)
   sig_bytes <- sign_transaction(body_bytes)
-  signature_map <- list(
+  signature_map <- signature_map_message(
     sigPair = list(
-      list(
+      signature_pair_message(
         pubKeyPrefix = pub_key,
         ed25519 = sig_bytes
       )
@@ -350,7 +382,21 @@ With the payment prepared we can request account information over gRPC.
 ```{r}
 query_account_info <- function(config, account_id) {
   channel <- config$grpc$channel()
-  on.exit(grpc::grpc_channel_destroy(channel))
+  destroy_channel <- get0(
+    "grpc_channel_destroy",
+    envir = asNamespace("grpc"),
+    inherits = FALSE
+  )
+  if (is.null(destroy_channel)) {
+    destroy_channel <- get0(
+      "channel_destroy",
+      envir = asNamespace("grpc"),
+      inherits = FALSE
+    )
+  }
+  if (!is.null(destroy_channel) && inherits(channel, "grpc_channel")) {
+    on.exit(destroy_channel(channel))
+  }
 
   cost_response <- crypto_cost_query(account_id, channel)
   cost <- cost_response$cryptogetaccountinfo$responseHeader$cost
@@ -358,9 +404,9 @@ query_account_info <- function(config, account_id) {
 
   query_message <- query_wrapper(
     cryptogetinfo = crypto_get_account_info(
-      header = list(
+      header = query_header(
         responseType = "ANSWER_ONLY",
-        payment = list(signedTransactionBytes = payment)
+        payment = transaction(signedTransactionBytes = payment)
       ),
       accountID = to_account_id(account_id)
     )
